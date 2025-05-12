@@ -7,4 +7,3 @@ namespace IdentityServerAPI
         public string? DatabaseName { get; set; }
     }
 }
-

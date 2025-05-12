@@ -2,6 +2,9 @@ using System.Net;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using IdentityServerAPI;
+using Microsoft.AspNetCore.Identity;
+using AspNetCore.Identity.Mongo;
+using IdentityServerAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,11 +27,21 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(settings.DatabaseName);
 });
 
+// Cấu hình Identity
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(options =>
+    {
+        options.ConnectionString = builder.Configuration["MongoSettings:ConnectionString"];
+        options.UsersCollection = "AspNetUsers";
+        options.RolesCollection = "AspNetRoles";
+    })
+    .AddDefaultTokenProviders();
+
+
 // Thêm các dịch vụ cần thiết khác
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -38,7 +51,6 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.UseHttps(); // HTTPS
     });
 });
-
 
 var app = builder.Build();
 
