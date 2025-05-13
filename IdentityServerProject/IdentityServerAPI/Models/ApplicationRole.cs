@@ -1,9 +1,7 @@
-using AspNetCore.Identity.Mongo.Model;
+using Microsoft.AspNetCore.Identity;
 using System;
 
 namespace IdentityServerAPI.Models
 {
-    public class ApplicationRole : MongoRole<Guid>
-    {
-    }
+    public class ApplicationRole : IdentityRole<Guid> { }
 }

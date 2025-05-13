@@ -1,4 +1,3 @@
-// MongoSettings.cs
 namespace IdentityServerAPI
 {
     public class MongoSettings
