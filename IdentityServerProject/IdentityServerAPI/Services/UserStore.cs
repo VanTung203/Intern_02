@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace IdentityServerAPI.Services
 {
-    public class UserStore : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>
+    public class UserStore : 
+        IUserStore<ApplicationUser>, 
+        IUserPasswordStore<ApplicationUser>,
+        IUserEmailStore<ApplicationUser>  // Thêm interface này
     {
         private readonly IMongoCollection<ApplicationUser> _users;
 
@@ -36,18 +39,20 @@ namespace IdentityServerAPI.Services
 
         public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            return Task.Run(() => _users.Find(u => u.Id == Guid.Parse(userId)).FirstOrDefault());
+            return Task.Run(() => 
+                _users.Find(u => u.Id == Guid.Parse(userId)).FirstOrDefault());
         }
 
         public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            return Task.Run(() => _users.Find(u => u.NormalizedUserName == normalizedUserName).FirstOrDefault());
+            return Task.Run(() => 
+                _users.Find(u => u.NormalizedUserName == normalizedUserName).FirstOrDefault());
         }
 
-        public Task<string> GetUserIdAsync(ApplicationUser user, CancellationToken cancellationToken) => 
+        public Task<string> GetUserIdAsync(ApplicationUser user, CancellationToken cancellationToken) =>
             Task.FromResult(user.Id.ToString());
 
-        public Task<string> GetUserNameAsync(ApplicationUser user, CancellationToken cancellationToken) => 
+        public Task<string> GetUserNameAsync(ApplicationUser user, CancellationToken cancellationToken) =>
             Task.FromResult(user.UserName);
 
         public Task SetUserNameAsync(ApplicationUser user, string userName, CancellationToken cancellationToken)
@@ -56,7 +61,7 @@ namespace IdentityServerAPI.Services
             return Task.CompletedTask;
         }
 
-        public Task<string> GetNormalizedUserNameAsync(ApplicationUser user, CancellationToken cancellationToken) => 
+        public Task<string> GetNormalizedUserNameAsync(ApplicationUser user, CancellationToken cancellationToken) =>
             Task.FromResult(user.NormalizedUserName);
 
         public Task SetNormalizedUserNameAsync(ApplicationUser user, string normalizedName, CancellationToken cancellationToken)
@@ -71,10 +76,10 @@ namespace IdentityServerAPI.Services
             return Task.CompletedTask;
         }
 
-        public Task<string> GetPasswordHashAsync(ApplicationUser user, CancellationToken cancellationToken) => 
+        public Task<string> GetPasswordHashAsync(ApplicationUser user, CancellationToken cancellationToken) =>
             Task.FromResult(user.PasswordHash);
 
-        public Task<bool> HasPasswordAsync(ApplicationUser user, CancellationToken cancellationToken) => 
+        public Task<bool> HasPasswordAsync(ApplicationUser user, CancellationToken cancellationToken) =>
             Task.FromResult(!string.IsNullOrEmpty(user.PasswordHash));
 
         public Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken)
@@ -82,10 +87,45 @@ namespace IdentityServerAPI.Services
             return Task.Run(() =>
             {
                 var filter = Builders<ApplicationUser>.Filter.Eq(u => u.Id, user.Id);
-                var updateResult = _users.ReplaceOne(filter, user);
-
-                return updateResult.IsAcknowledged ? IdentityResult.Success : IdentityResult.Failed();
+                var result = _users.ReplaceOne(filter, user);
+                return result.IsAcknowledged ? IdentityResult.Success : IdentityResult.Failed();
             });
+        }
+
+        // ==============================
+        // Triển khai IUserEmailStore
+        // ==============================
+        public Task SetEmailAsync(ApplicationUser user, string email, CancellationToken cancellationToken)
+        {
+            user.Email = email;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetEmailAsync(ApplicationUser user, CancellationToken cancellationToken) =>
+            Task.FromResult(user.Email);
+
+        public Task<bool> GetEmailConfirmedAsync(ApplicationUser user, CancellationToken cancellationToken) =>
+            Task.FromResult(user.EmailConfirmed);
+
+        public Task SetEmailConfirmedAsync(ApplicationUser user, bool confirmed, CancellationToken cancellationToken)
+        {
+            user.EmailConfirmed = confirmed;
+            return Task.CompletedTask;
+        }
+
+        public Task<ApplicationUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => 
+                _users.Find(u => u.NormalizedEmail == normalizedEmail).FirstOrDefault());
+        }
+
+        public Task<string> GetNormalizedEmailAsync(ApplicationUser user, CancellationToken cancellationToken) =>
+            Task.FromResult(user.NormalizedEmail);
+
+        public Task SetNormalizedEmailAsync(ApplicationUser user, string normalizedEmail, CancellationToken cancellationToken)
+        {
+            user.NormalizedEmail = normalizedEmail;
+            return Task.CompletedTask;
         }
 
         public void Dispose() { }
