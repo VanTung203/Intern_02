@@ -21,7 +21,11 @@ namespace IdentityServerAPI.Controllers
         private readonly EmailService _emailService;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, EmailService emailService, IConfiguration configuration)
+        public AuthController(
+            UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            EmailService emailService, 
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -52,30 +56,30 @@ namespace IdentityServerAPI.Controllers
 
             // Gửi email xác nhận
             var subject = "Xác thực đăng ký tài khoản";
-            var message = $"Xin chào {model.FullName},\n\nTài khoản của bạn đã được đăng ký thành công! Vui lòng nhấp vào liên kết dưới đây để xác minh địa chỉ email của bạn: {confirmationLink}";
+            var message = $"Xin chào {model.FullName},\n\nVui lòng xác minh email của bạn bằng cách nhấp vào liên kết sau:\n{confirmationLink}";
             await _emailService.SendEmailAsync(model.Email, subject, message);
 
-            return Ok("Đã đăng ký thành công. Kiểm tra email của bạn để xác minh tài khoản.");
+            return Ok("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.");
         }
 
         [HttpGet("confirmemail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             if (userId == null || token == null)
-                return BadRequest("Invalid request.");
+                return BadRequest("Yêu cầu không hợp lệ.");
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return BadRequest("User not found.");
+                return BadRequest("Không tìm thấy người dùng.");
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
-                return Redirect("https://yourfrontend.com/login");  // Chuyển hướng đến trang đăng nhập
+                return Redirect("https://yourfrontend.com/login");
             }
 
-                return BadRequest("Xác minh email thất bại.");
-}
+            return BadRequest("Xác minh email thất bại.");
+        }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
@@ -84,7 +88,12 @@ namespace IdentityServerAPI.Controllers
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                return Unauthorized("Invalid email or password.");
+                return Unauthorized("Email hoặc mật khẩu không đúng.");
+            }
+
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return Unauthorized("Email chưa được xác thực.");
             }
 
             var claims = new[]
@@ -114,8 +123,48 @@ namespace IdentityServerAPI.Controllers
 
             return Ok(new { Token = tokenString });
         }
+
+        // ================================
+        // Quên mật khẩu - Gửi token
+        // ================================
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return BadRequest("Email không tồn tại.");
+
+            // Tạo token đặt lại mật khẩu
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var subject = "Yêu cầu đặt lại mật khẩu";
+            var message = $"Xin chào {user.FullName},\n\nMã token đặt lại mật khẩu của bạn là:\n\n{token}\n\nSử dụng mã này để đặt lại mật khẩu của bạn.";
+
+            await _emailService.SendEmailAsync(user.Email, subject, message);
+
+            return Ok("Đã gửi email chứa token đặt lại mật khẩu. Vui lòng kiểm tra email của bạn.");
+        }
+
+        // ================================
+        // Đặt lại mật khẩu
+        // ================================
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return BadRequest("Email không tồn tại.");
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            return Ok("Đặt lại mật khẩu thành công.");
+        }
     }
 
+    // DTOs
     public class RegisterDto
     {
         public string Email { get; set; } = string.Empty;
@@ -127,5 +176,17 @@ namespace IdentityServerAPI.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    public class ForgotPasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
     }
 }
