@@ -44,12 +44,38 @@ namespace IdentityServerAPI.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
+            // Tạo mã xác nhận email
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            // Tạo đường link xác nhận email
+            var confirmationLink = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, token = token }, Request.Scheme);
+
+            // Gửi email xác nhận
             var subject = "Xác thực đăng ký tài khoản";
-            var message = $"Xin chào {model.FullName},\n\nTài khoản của bạn đã được đăng ký thành công!";
+            var message = $"Xin chào {model.FullName},\n\nTài khoản của bạn đã được đăng ký thành công! Vui lòng nhấp vào liên kết dưới đây để xác minh địa chỉ email của bạn: {confirmationLink}";
             await _emailService.SendEmailAsync(model.Email, subject, message);
 
-            return Ok("User registered successfully. Verification email sent.");
+            return Ok("Đã đăng ký thành công. Kiểm tra email của bạn để xác minh tài khoản.");
         }
+
+        [HttpGet("confirmemail")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+                return BadRequest("Invalid request.");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return BadRequest("User not found.");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return Redirect("https://yourfrontend.com/login");  // Chuyển hướng đến trang đăng nhập
+            }
+
+                return BadRequest("Xác minh email thất bại.");
+}
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
