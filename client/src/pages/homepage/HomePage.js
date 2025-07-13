@@ -52,7 +52,7 @@ const HomePage = () => {
             <NewsSection news={news} />
 
             {/* Phần nội dung chính: Thống kê và Văn bản */}
-            <Grid container spacing={4} sx={{ mt: 4 }}>
+            <Grid container spacing={10} sx={{ mt: 4 }}>
                 <Grid item xs={12} md={4}>
                     <StatisticsSection stats={stats} />
                 </Grid>
