@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using IdentityServerAPI.Models;
+using IdentityServerAPI.Enums;
 using IdentityServerAPI.Configuration;
 // using IdentityServerAPI.Repositories;
 using IdentityServerAPI.Services;
@@ -74,6 +75,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); // AuthService là nơi logic chính
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IHomepageService, HomepageService>();
 
 // --- 6. Cấu hình JWT Authentication và thêm GOOGLE Authentication ---
 builder.Services.AddAuthentication(options =>
@@ -150,7 +152,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Cấu hình CORS (Giữ nguyên)
+// Cấu hình CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendOrigin",
@@ -163,7 +165,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Cấu hình Kestrel (Giữ nguyên)
+// Cấu hình Kestrel
 builder.WebHost.ConfigureKestrel(options =>
 {
     var httpPortEnv = Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS");
@@ -195,7 +197,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "IdentityServerAPI v1"));
     app.UseDeveloperExceptionPage();
 
-    // GỌI HÀM SEED Ở ĐÂY
+    // Gọi hàm seed
     using (var scope = app.Services.CreateScope()) // Tạo scope để lấy services
     {
         var services = scope.ServiceProvider;
@@ -304,7 +306,7 @@ async Task SeedDatabaseAsync(IServiceProvider services)
             }
             else
             {
-                 logger.LogWarning($"Role '{adminRoleName}' does not exist. Cannot assign to admin user.");
+                logger.LogWarning($"Role '{adminRoleName}' does not exist. Cannot assign to admin user.");
             }
         }
         else
@@ -320,9 +322,69 @@ async Task SeedDatabaseAsync(IServiceProvider services)
         {
             logger.LogInformation($"Attempting to add role '{adminRoleName}' to existing admin user '{adminEmail}'.");
             var addToRoleResult = await userManager.AddToRoleAsync(adminUserInDb, adminRoleName);
-             if (addToRoleResult.Succeeded) logger.LogInformation($"Existing user '{adminEmail}' successfully added to role '{adminRoleName}'.");
-             else logger.LogError($"Error adding existing user '{adminEmail}' to role '{adminRoleName}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
+            if (addToRoleResult.Succeeded) logger.LogInformation($"Existing user '{adminEmail}' successfully added to role '{adminRoleName}'.");
+            else logger.LogError($"Error adding existing user '{adminEmail}' to role '{adminRoleName}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
         }
     }
+    logger.LogInformation("Database seeding finished.");
+    
+    // 3. Seed Sample Data for HoSo, TinTuc, VanBanPhapLuat
+    logger.LogInformation("Attempting to seed sample data for new collections...");
+    var database = services.GetRequiredService<IMongoDatabase>();
+    
+    // Seed Tin Tức
+    var tinTucCollection = database.GetCollection<TinTuc>("TinTuc");
+    if (await tinTucCollection.CountDocumentsAsync(_ => true) == 0)
+    {
+        logger.LogInformation("Seeding sample news articles...");
+        var sampleNews = new List<TinTuc>
+        {
+            new TinTuc { TieuDe = "Thẩm quyền cấp sổ đỏ tại Hà Nội mới nhất 2025", MoTaNgan = "Hiện nay thẩm quyền cấp sổ đỏ tại Hà Nội được quy định thế nào khi bỏ cấp huyện?", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+1" },
+            new TinTuc { TieuDe = "Quy định mới về cấp giấy chứng nhận quyền sử dụng đất", MoTaNgan = "Những thay đổi quan trọng trong Luật Đất đai (sửa đổi) mà người dân cần biết.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+2" },
+            new TinTuc { TieuDe = "Hướng dẫn nộp hồ sơ đất đai trực tuyến", MoTaNgan = "Các bước chi tiết để nộp hồ sơ đăng ký biến động đất đai qua cổng dịch vụ công quốc gia.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+3" },
+            new TinTuc { TieuDe = "Giá đất các quận trung tâm Hà Nội có thể tăng", MoTaNgan = "Dự thảo bảng giá đất mới cho giai đoạn 2025-2029 đang được lấy ý kiến.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+4" }
+        };
+        await tinTucCollection.InsertManyAsync(sampleNews);
+        logger.LogInformation("Seeded {Count} news articles.", sampleNews.Count);
+    }
+    
+    // Seed Văn Bản Pháp Luật
+    var vanBanCollection = database.GetCollection<VanBanPhapLuat>("VanBanPhapLuat");
+    if (await vanBanCollection.CountDocumentsAsync(_ => true) == 0)
+    {
+        logger.LogInformation("Seeding sample legal documents...");
+        var sampleDocs = new List<VanBanPhapLuat>
+        {
+            new VanBanPhapLuat { TieuDe = "Nghị định 91/2019/NĐ-CP về xử phạt vi phạm hành chính trong lĩnh vực đất đai", SoHieuVanBan = "91/2019/NĐ-CP", NgayBanHanh = new DateTime(2019, 11, 19) },
+            new VanBanPhapLuat { TieuDe = "Thông tư 25/2014/TT-BTNMT quy định về bản đồ địa chính", SoHieuVanBan = "25/2014/TT-BTNMT", NgayBanHanh = new DateTime(2014, 5, 19) },
+            new VanBanPhapLuat { TieuDe = "Luật Đất đai (sửa đổi) 2024", SoHieuVanBan = "31/2024/QH15", NgayBanHanh = new DateTime(2024, 1, 18) },
+            new VanBanPhapLuat { TieuDe = "Thông tư 33/2017/TT-BTNMT quy định chi tiết Nghị định 01/2017/NĐ-CP", SoHieuVanBan = "33/2017/TT-BTNMT", NgayBanHanh = new DateTime(2017, 9, 29) }
+        };
+        await vanBanCollection.InsertManyAsync(sampleDocs);
+        logger.LogInformation("Seeded {Count} legal documents.", sampleDocs.Count);
+    }
+    
+    // Seed Hồ Sơ (để có dữ liệu thống kê)
+    var hoSoCollection = database.GetCollection<HoSo>("HoSo");
+    if (await hoSoCollection.CountDocumentsAsync(_ => true) == 0)
+    {
+        logger.LogInformation("Seeding sample Ho So records...");
+        // Lấy admin user để gán làm chủ hồ sơ
+        var adminUser = await userManager.FindByEmailAsync(configuration["SeedAdminUser:Email"]);
+        if(adminUser != null)
+        {
+            var sampleHoSo = new List<HoSo>
+            {
+                new HoSo { SoBienNhan = "HS00001", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DangXuLy },
+                new HoSo { SoBienNhan = "HS00002", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DangXuLy },
+                new HoSo { SoBienNhan = "HS00003", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTra },
+                new HoSo { SoBienNhan = "HS00004", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DangXuLy },
+                new HoSo { SoBienNhan = "HS00005", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTra }
+            };
+            await hoSoCollection.InsertManyAsync(sampleHoSo);
+            logger.LogInformation("Seeded {Count} Ho So records.", sampleHoSo.Count);
+        }
+    }
+
     logger.LogInformation("Database seeding finished.");
 }
