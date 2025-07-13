@@ -1,54 +1,62 @@
-# INTERNSHIP PROJECT 01: BUILDING A CENTRALIZED ACCOUNT MANAGEMENT & AUTHENTICATION SYSTEM (IDENTITY SERVER)
+# 🌍 INTERNSHIP PROJECT 02: LAND PUBLIC SERVICE PROTAL
 
-This project aims to build a centralized account management and authentication system, utilizing the Identity Server architecture.
+---
 
-## I. Technologies Used
+## 📝 Introduction
 
-*   **Database:**
-    *   MongoDB
-*   **Backend:**
-    *   ASP.NET Core (6.0)
-*   **Frontend:**
-    *   Webpack
-    *   React
-    *   MUI (Material UI)
+This project is a continuation and expansion of a previous user account and authentication management system. Its primary goal is to build a comprehensive **Land Public Service Portal**. This portal will offer core functionalities to address the needs of receiving land-related administrative procedure applications, resolving these procedures, querying land parcel information, tracking application progress, and providing access to relevant news and legal documents concerning land.
 
-## II. Requirements
+---
 
-### 1. Backend:
+## ✨ Objectives & Requirements
 
-*   Initialize configuration and deploy Identity Server on an ASP.NET Core 6.0 server, storing data in MongoDB.
-*   Enable account registration, email account verification, password recovery (forgot password), and two-factor authentication (2FA).
-*   Allow users to update their account information and enable/disable 2FA.
-*   Allow administrators to:
-    *   Create accounts.
-    *   Lock/unlock accounts.
-    *   Delete accounts.
-*   Configure the system to allow website authentication using Google accounts (Google external login).
+### Objectives
+* To develop an efficient and user-friendly public service portal for land administration.
+* To provide essential tools for both citizens and governing bodies.
 
-### 2. Frontend:
+### Key Requirements
+* **Modern and User-Friendly Interface**: Ensure an optimal user experience across various devices (Desktop, Mobile).
+* **Easy Application Submission & Lookup**: The process for submitting and retrieving information must be simple and clear.
+* **Information Updates**: Provide timely news and legal documents related to land.
+* **Clear Role-Based Access**: Differentiate access and processing permissions between **Administrators** and **Regular Users**.
 
-*   **Client Project Initialization:**
-    *   Webpack configuration.
-    *   React setup.
-    *   Material UI (MUI) setup.
-*   **UI Implementation:**
-    *   Account registration.
-    *   UI for prompting email verification after registration.
-    *   UI for displaying successful email verification.
-    *   Login.
-    *   UI for OTP input (for 2FA).
-    *   Forgot password (Enter email to receive password reset token).
-    *   UI for notification of successful password reset email dispatch.
-    *   Password reset UI.
-    *   UI for notification of successful password reset.
-    *   **User Account Management:**
-        *   Avatar upload.
-        *   User profile update.
-    *   **Account Security Management:**
-        *   Change password.
-        *   Enable/disable 2FA.
-    *   **Admin Panel UI:**
-        *   Account list with statuses.
-        *   Account details view.
-        *   Create new account (form/interface).
+---
+
+## 🛠️ Core Functions
+
+The project will include the following core functions:
+
+1.  **Application Submission**: Allows users to submit land-related administrative procedure applications online.
+2.  **Submitted Application Lookup**: Users can check the status and processing progress of their submitted applications.
+3.  **Land Parcel Information Lookup**: Provides the ability to search for and display detailed information about land parcels.
+4.  **Land-Related Articles**: Offers a dedicated section for news and articles concerning the land sector.
+5.  **Legal Documents View**: Allows users to browse relevant circulars, decrees, and other legal documents.
+
+---
+
+## 🖥️ Pages to be Developed
+
+To achieve the above functionalities, the following pages will be developed:
+
+### 1. Homepage
+* Displays **quick statistics**: Number of applications received, returned, and currently being processed.
+* A **quick application lookup** section.
+* Featured **news** and **legal documents**.
+
+### 2. Application Submission Page (Login Required)
+* Allows selection of **administrative procedure categories**.
+* Enables users to input **applicant information**.
+* Allows input of **land parcel information**.
+* **Upload** accompanying documents.
+* Provides an **application receipt number** upon successful submission.
+
+### 3. Application Information Lookup Page (No Login Required)
+* Allows input of **receipt number** or **document number** to look up application information and progress.
+
+### 4. Land Parcel Information Lookup Page (No Login Required)
+* Develop an integrated **map page**.
+* Allows input of **sheet number and parcel number** to search for and display the land parcel's shape on the map.
+
+### 5. News Article Detail View Page (No Login Required)
+
+### 6. Legal Documents View Page (No Login Required)
