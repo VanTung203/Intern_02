@@ -1,6 +1,7 @@
 // src/components/homepage/LookupSection.js
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, Paper, CircularProgress, Alert } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import homepageService from '../../services/homepageService'; // Import service
 
 const LookupSection = () => {
@@ -31,7 +32,7 @@ const LookupSection = () => {
     return (
         <Paper elevation={2} sx={{ p: 3, mb: 4, textAlign: 'center' }}>
             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Mục tra cứu nhanh thông tin hồ sơ
+                Tra cứu nhanh thông tin hồ sơ
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
                 <TextField 
@@ -42,8 +43,20 @@ const LookupSection = () => {
                     onKeyPress={(e) => e.key === 'Enter' && handleLookup()} // Cho phép nhấn Enter để tìm
                     sx={{ width: '50%', mr: 1 }}
                 />
-                <Button variant="contained" size="large" onClick={handleLookup} disabled={loading}>
-                    {loading ? <CircularProgress size={24} /> : 'Tìm kiếm'}
+                <Button 
+                    variant="contained" 
+                    size="large" 
+                    onClick={handleLookup} 
+                    disabled={loading} 
+                    startIcon={loading ? null : <SearchIcon />} // Chỉ hiện icon khi không loading
+                    sx={{
+                        backgroundColor: 'grey.800', // Màu nền
+                        '&:hover': {
+                            backgroundColor: 'grey.900' // Màu nền khi hover
+                        }
+                    }}
+                >
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Tìm kiếm'}
                 </Button>
             </Box>
 
