@@ -1,12 +1,12 @@
 // client/src/App.js
-import React, { useEffect } from 'react'; // Thêm useEffect
-// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom'; 
 import { useAuth } from './context/AuthContext';
 
 // Layouts
 import PublicPageLayout from './components/layouts/PublicPageLayout';
 import DashboardLayout from './components/layouts/DashboardLayout';
+import HomepageLayout from './components/layouts/HomepageLayout';
 
 // Public Pages
 import RegisterPage from './pages/RegisterPage';
@@ -19,6 +19,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ResetPasswordSuccessPage from './pages/ResetPasswordSuccessPage';
 import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import GoogleSigninSuccessPage from './pages/GoogleSigninSuccessPage';
+import HomePage from './pages/homepage/HomePage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
@@ -29,12 +30,10 @@ import UserSecurityContent from './components/User/UserSecurityContent';
 import UserListPage from './pages/admin/UserListPage';
 
 // Routing Components
-import PrivateRoute from './components/routing/PrivateRoute'; // THÊM IMPORT NÀY
-import AdminRoute from './components/routing/AdminRoute';   // THÊM IMPORT NÀY
+import PrivateRoute from './components/routing/PrivateRoute';
+import AdminRoute from './components/routing/AdminRoute';
 
-import { Typography, Box, CircularProgress } from '@mui/material'; // << THÊM Box VÀO ĐÂY
-
-import { setGlobalAuthHeader } from './api/apiClient';
+import { Typography, Box, CircularProgress } from '@mui/material';
 
 function App() {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -50,8 +49,11 @@ function App() {
 
   return (
       <Routes>
-        {/* Public Routes: Không cần DashboardLayout, có thể có PublicPageLayout nếu RegisterPage không tự chứa layout */}
-        {/* Nếu RegisterPage và LoginPage đã dùng PublicPageLayout bên trong chúng thì không cần bọc ở đây */}
+        {/* Route cha sử dụng HomepageLayout */}
+        <Route element={<HomepageLayout />}>
+          <Route path="/" element={<HomePage />} />
+        </Route>
+
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/please-verify-email" element={<PleaseVerifyEmailPage />} />
         <Route path="/email-confirmed" element={<EmailConfirmedPage />} />
@@ -84,14 +86,14 @@ function App() {
         </Route>
 
         {/* Route mặc định */}
-        <Route 
+        {/* <Route 
           path="/" 
           element={
             isAuthenticated 
               ? (user?.roles?.includes('Admin') ? <Navigate to="/admin/users" replace /> : <Navigate to="/profile" replace />)
               : <Navigate to="/login" replace />
           } 
-        />
+        /> */}
 
         {/* Trang 404 */}
         <Route path="*" element={
