@@ -15,7 +15,7 @@ const Header = () => {
             {/* <<< BỌC LOGO VÀ TIÊU ĐỀ TRONG LINK >>> */}
             <Link component={RouterLink} to="/" sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, textDecoration: 'none', color: 'text.primary' }}>
               <img src={logo} alt="Logo" style={{ height: '40px', marginRight: '16px' }} />
-              <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                 CỔNG DỊCH VỤ CÔNG ĐẤT ĐAI
               </Typography>
             </Link>
