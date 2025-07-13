@@ -31,7 +31,7 @@ const LookupSection = () => {
 
     return (
         <Paper elevation={2} sx={{ p: 3, mb: 4, textAlign: 'center' }}>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Tra cứu nhanh thông tin hồ sơ
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
@@ -41,7 +41,15 @@ const LookupSection = () => {
                     value={receiptNumber}
                     onChange={(e) => setReceiptNumber(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleLookup()} // Cho phép nhấn Enter để tìm
-                    sx={{ width: '50%', mr: 1 }}
+                    sx={{ 
+                        width: '60%', 
+                        mr: 1,
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                                borderColor: 'grey.500', // Thêm màu viền mặc định
+                            },
+                        }, 
+                    }}
                 />
                 <Button 
                     variant="contained" 

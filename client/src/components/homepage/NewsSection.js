@@ -31,7 +31,7 @@ const NewsSection = ({ news }) => {
 
     return (
         <Box sx={{ my: 4 }}>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
+            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
                 Tin tức
             </Typography>
             <Slider {...settings}>
@@ -39,7 +39,6 @@ const NewsSection = ({ news }) => {
                     <Box key={article.id} sx={{ px: 2 }}>
                         {/* Thay đổi chính ở đây */}
                         <Card sx={{ height: 220, display: 'flex', flexDirection: 'column' }}> {/* Đặt chiều cao cố định cho Card */}
-                            {/* === XÓA BỎ HOÀN TOÀN PHẦN CardMedia Ở ĐÂY === */}
                             <CardContent sx={{ flexGrow: 1 }}> {/* Cho phép CardContent co giãn để lấp đầy thẻ */}
                                 <Typography 
                                     gutterBottom 
