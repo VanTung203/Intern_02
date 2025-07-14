@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
-// Chúng ta sẽ tạo Header và Footer ở các bước tiếp theo
 import Header from '../homepage/Header'; 
 import Footer from '../homepage/Footer';
 
