@@ -8,7 +8,7 @@ import apiClient, { setGlobalAuthHeader } from '../api/apiClient'; // Import ins
  */
 export const register = async (userData) => {
   try {
-    const response = await apiClient.post('/api/auth/register', userData);
+    const response = await apiClient.post('/auth/register', userData);
     return response.data;
   } catch (error) {
     // Interceptor trong apiClient.js có thể đã log lỗi, ở đây chỉ cần ném lại
@@ -26,7 +26,7 @@ export const register = async (userData) => {
  */
 export const confirmEmail = async (userId, token) => {
     try {
-        const response = await apiClient.get('/api/auth/confirmemail', {
+        const response = await apiClient.get('/auth/confirmemail', {
             params: { userId, token }
         });
         return response.data || { message: "Yêu cầu xác thực email đã được xử lý." };
@@ -43,7 +43,7 @@ export const confirmEmail = async (userId, token) => {
  */
 export const forgotPassword = async (emailData) => {
     try {
-        const response = await apiClient.post('/api/auth/forgot-password', emailData);
+        const response = await apiClient.post('/auth/forgot-password', emailData);
         return response.data;
     } catch (error) {
         console.error("API Error - Forgot Password in authService:", error.response?.data || error.message);
@@ -58,7 +58,7 @@ export const forgotPassword = async (emailData) => {
  */
 export const resetPassword = async (resetData) => {
     try {
-        const response = await apiClient.post('/api/auth/reset-password', resetData);
+        const response = await apiClient.post('/auth/reset-password', resetData);
         return response.data;
     } catch (error) {
         console.error("API Error - Reset Password in authService:", error.response?.data || error.message);
@@ -73,7 +73,7 @@ export const resetPassword = async (resetData) => {
  */
 export const login = async (credentials) => {
   try {
-    const response = await apiClient.post('/api/auth/login', credentials);
+    const response = await apiClient.post('/auth/login', credentials);
     // Chỉ cần trả về dữ liệu. KHÔNG xử lý localStorage hay header ở đây nữa.
     return response.data; 
   } catch (error) {
@@ -91,7 +91,7 @@ export const login = async (credentials) => {
  */
 export const verifyTwoFactorOtp = async (email, otpCode) => {
   try {
-    const response = await apiClient.post('/api/auth/verify-2fa', { email, otpCode });
+    const response = await apiClient.post('/auth/verify-2fa', { email, otpCode });
     // Chỉ trả về dữ liệu. KHÔNG xử lý localStorage hay header ở đây nữa.
     return response.data;
   } catch (error) {
@@ -108,7 +108,7 @@ export const verifyTwoFactorOtp = async (email, otpCode) => {
 export const changePassword = async (passwordData) => {
   try {
     // API endpoint này cần token xác thực đã được set vào apiClient bởi setGlobalAuthHeader
-    const response = await apiClient.post('/api/auth/change-password', passwordData);
+    const response = await apiClient.post('/auth/change-password', passwordData);
     return response.data; // Mong đợi { message: "..." }
   } catch (error) {
     console.error("API Error - Change Password in authService:", error.response?.data || error.message);
