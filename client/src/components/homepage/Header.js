@@ -3,9 +3,14 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, Link, Container } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import logo from '../../assets/logo_Vietbando.png'; // Đảm bảo đường dẫn này đúng
+import logo from '../../assets/logo_Vietbando.png';
+import { useAuth } from '../../context/AuthContext';
+import UserMenu from './UserMenu';
 
 const Header = () => {
+  // Lấy trạng thái đăng nhập từ
+  const { isAuthenticated } = useAuth();
+
   return (
     <>
       {/* Thanh Header trên cùng */}
@@ -19,36 +24,43 @@ const Header = () => {
                 CỔNG DỊCH VỤ CÔNG ĐẤT ĐAI
               </Typography>
             </Link>
+            {/* Hiển thị có điều kiện */}
             <Box>
-              <Button 
-                component={RouterLink} 
-                to="/register" 
-                variant="outlined" 
-                sx={{ 
-                  mr: 1,
-                  borderColor: 'grey.800', // Màu viền
-                  color: 'grey.800', // Màu chữ
-                  '&:hover': {
-                    borderColor: 'grey.900',
-                    backgroundColor: 'action.hover'
-                  }
-                }}
-              >
-                Đăng ký
-              </Button>
-              <Button 
-                component={RouterLink} 
-                to="/login" 
-                variant="contained" 
-                sx={{
-                  backgroundColor: 'grey.800', // Màu nền
-                  '&:hover': {
-                    backgroundColor: 'grey.900' // Màu nền khi hover
-                  }
-                }}
-              >
-                Đăng nhập
-              </Button>
+              {isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <>
+                  <Button 
+                    component={RouterLink} 
+                    to="/register" 
+                    variant="outlined" 
+                    sx={{ 
+                      mr: 1,
+                      borderColor: 'grey.800',
+                      color: 'grey.800',
+                      '&:hover': {
+                        borderColor: 'grey.900',
+                        backgroundColor: 'action.hover'
+                      }
+                    }}
+                  >
+                    Đăng ký
+                  </Button>
+                  <Button 
+                    component={RouterLink} 
+                    to="/login" 
+                    variant="contained" 
+                    sx={{
+                      backgroundColor: 'grey.800',
+                      '&:hover': {
+                        backgroundColor: 'grey.900'
+                      }
+                    }}
+                  >
+                    Đăng nhập
+                  </Button>
+                </>
+              )}
             </Box>
           </Toolbar>
         </Container>
