@@ -48,15 +48,11 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
 
-        // LOGIC ĐIỀU HƯỚNG TẬP TRUNG
-        if (userData.roles?.includes('Admin')) {
-            navigate('/admin/users', { replace: true });
-        } else {
-            navigate('/profile/info', { replace: true });
-        }
+        // Điều hướng về Trang chủ sau khi đăng nhập thành công.
+        navigate('/', { replace: true });
     };
 
-    // >>> START: THÊM HÀM MỚI <<<
+    
     // Hàm này được gọi từ trang callback, chỉ nhận token
     const loginActionFromToken = (token) => {
         // 1. Lưu token và thiết lập header
@@ -79,22 +75,18 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         setIsLoading(false); // Quan trọng: dừng trạng thái loading
 
-        // 4. Điều hướng
-        const rolesArray = Array.isArray(userData.roles) ? userData.roles : [userData.roles];
-        if (rolesArray.includes('Admin')) {
-            navigate('/admin/users', { replace: true });
-        } else {
-            navigate('/profile/info', { replace: true });
-        }
+        // Điều hướng về Trang chủ sau khi đăng nhập thành công.
+        navigate('/', { replace: true });
     };
-    // >>> END: THÊM HÀM MỚI <<<
+    
 
     const logoutAction = () => {
         localStorage.removeItem('authToken');
         setGlobalAuthHeader(null);
         setUser(null);
         setIsAuthenticated(false);
-        navigate('/login', { replace: true }); // Điều hướng về trang login sau khi logout
+        // Về trang chủ sau khi đăng xuất
+        navigate('/', { replace: true });
     };
 
     const authContextValue = {
