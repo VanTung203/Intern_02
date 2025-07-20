@@ -20,6 +20,7 @@ import ResetPasswordSuccessPage from './pages/ResetPasswordSuccessPage';
 import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import GoogleSigninSuccessPage from './pages/GoogleSigninSuccessPage';
 import HomePage from './pages/homepage/HomePage';
+import NopHoSoPage from './pages/NopHoSoPage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
@@ -52,6 +53,9 @@ function App() {
         {/* Route cha sử dụng HomepageLayout */}
         <Route element={<HomepageLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route element={<PrivateRoute />}> 
+            <Route path="/nop-ho-so" element={<NopHoSoPage />} />
+          </Route>
         </Route>
 
         <Route path="/register" element={<RegisterPage />} />
@@ -65,7 +69,7 @@ function App() {
         <Route path="/verify-2fa" element={<TwoFactorAuthPage />} />
         <Route path="/google-signin-success" element={<GoogleSigninSuccessPage />} />
 
-        {/* User Private Routes */}
+        {/* User Private Routes và DashboardLayout*/}
         <Route element={<PrivateRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/profile" element={<UserProfilePage />}>
