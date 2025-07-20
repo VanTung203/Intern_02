@@ -4,7 +4,7 @@ import {
   TextField, Button, Box, Typography, Link as MuiLink,
   IconButton, InputAdornment, Alert, CircularProgress, Divider
 } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -16,6 +16,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:72
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const auth = useAuth(); // <-- LẤY CONTEXT
   const [formData, setFormData] = useState({
     email: '',
@@ -73,10 +74,14 @@ const LoginForm = () => {
                 // GỌI HÀM CỦA CONTEXT
                 auth.loginAction(response); 
                 
-                // KHÔNG navigate ở đây nữa. App.js sẽ tự động điều hướng.
-                // setTimeout(() => {
-                //     navigate('/profile/info'); 
-                // }, 1500); // <-- XÓA HOẶC COMMENT OUT KHỐI NÀY
+                // <<< LOGIC CHUYỂN HƯỚNG THÔNG MINH >>>
+                setTimeout(() => {
+                    // Lấy đường dẫn "from" mà PrivateRoute đã gửi
+                    const from = location.state?.from?.pathname || "/";
+                    // Chuyển hướng đến đường dẫn đó, hoặc về trang chủ nếu không có
+                    navigate(from, { replace: true });
+                }, 1000); // Đợi 1 giây để người dùng đọc thông báo thành công
+                
             } else {
                 setApiMessage({ type: 'error', text: response?.message || 'Lỗi không xác định.' });
             }

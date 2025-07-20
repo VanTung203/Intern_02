@@ -48,8 +48,9 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
 
+        // Việc điều hướng sẽ được thực hiện trong LoginForm
         // Điều hướng về Trang chủ sau khi đăng nhập thành công.
-        navigate('/', { replace: true });
+        // navigate('/', { replace: true });
     };
 
     
