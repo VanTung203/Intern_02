@@ -14,14 +14,24 @@ namespace IdentityServerAPI.Models
         public string SoBienNhan { get; set; } = string.Empty;
 
         [BsonElement("UserId")] // ID của người dùng đã nộp hồ sơ (liên kết với ApplicationUser)
-        public Guid UserId { get; set; } 
+        public Guid UserId { get; set; }
 
         [BsonElement("NgayNopHoSo")]
         public DateTime NgayNopHoSo { get; set; } = DateTime.UtcNow;
 
+        [BsonElement("NgayTiepNhan")]
+        public DateTime? NgayTiepNhan { get; set; } // Nullable, admin sẽ cập nhật sau
+
+        [BsonElement("NgayHenTra")]
+        public DateTime? NgayHenTra { get; set; } // Nullable, admin sẽ cập nhật sau
+
+        [BsonElement("MaThuTucHanhChinh")]
+        public string MaThuTucHanhChinh { get; set; } = string.Empty;
+
         [BsonElement("TrangThaiHoSo")]
         public HoSoStatus TrangThaiHoSo { get; set; } = HoSoStatus.DangXuLy;
-
-        // Các trường khác sẽ được thêm sau khi có chức năng chi tiết
+        
+        [BsonElement("LyDoTuChoi")]
+        public string? LyDoTuChoi { get; set; } // Nullable, chỉ có khi trạng thái là TuChoi
     }
 }

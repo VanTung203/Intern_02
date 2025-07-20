@@ -76,6 +76,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); // AuthService là nơi logic chính
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHomepageService, HomepageService>();
+builder.Services.AddScoped<IHoSoService, HoSoService>();
 
 // --- 6. Cấu hình JWT Authentication và thêm GOOGLE Authentication ---
 builder.Services.AddAuthentication(options =>
@@ -127,11 +128,12 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "IdentityServerAPI", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
         Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Description = "JWT Authorization header. \nPlease enter your token in the text input below. \n\nExample: \"12345abcdef\"",
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement()
     {
@@ -143,9 +145,6 @@ builder.Services.AddSwaggerGen(c =>
                     Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header,
             },
             new List<string>()
         }
@@ -159,7 +158,20 @@ builder.Services.AddCors(options =>
         policyBuilder =>
         {
             var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:3000";
-            policyBuilder.WithOrigins(frontendUrl)
+            var origins = new List<string> { frontendUrl };
+
+            // Nếu đang ở môi trường Development, cho phép cả các URL của Swagger
+            if (builder.Environment.IsDevelopment())
+            {
+                // Lấy các URL từ launchSettings.json để thêm vào
+                var launchSettings = builder.Configuration.GetSection("profiles:IdentityServerAPI:applicationUrl").Value;
+                if (!string.IsNullOrEmpty(launchSettings))
+                {
+                    origins.AddRange(launchSettings.Split(';').Select(url => url.TrimEnd('/')));
+                }
+            }
+            
+            policyBuilder.WithOrigins(origins.ToArray()) // Dùng danh sách origins đã tạo
                          .AllowAnyHeader()
                          .AllowAnyMethod();
         });
