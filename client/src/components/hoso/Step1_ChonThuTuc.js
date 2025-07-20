@@ -3,7 +3,7 @@ import { Box, Typography, TextField, RadioGroup, FormControlLabel, Radio, Circul
 import hoSoService from '../../services/hoSoService';
 import LocationSelector from './LocationSelector';
 
-const Step1ChonThuTuc = ({ formData, onDataChange }) => {
+const Step1ChonThuTuc = ({ formData, onDataChange, errors, showValidation }) => {
     const [thuTucList, setThuTucList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -49,12 +49,11 @@ const Step1ChonThuTuc = ({ formData, onDataChange }) => {
         <Box>
             <Typography variant="h6" gutterBottom>1. Chọn thủ tục</Typography>
             
-            {/* <<< TÍCH HỢP LOCATIONSELECTOR VÀO ĐÂY >>> */}
             <LocationSelector onLocationChange={handleLocationSelected} />
-            
-            <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
-                Lọc thủ tục theo khu vực (sẽ được phát triển).
-            </Typography>
+            {/* <<< HIỂN THỊ LỖI CHUNG CHO BƯỚC 1 KHI CẦN >>> */}
+            {showValidation && errors.maThuTucHanhChinh && (
+                <Alert severity="error" sx={{ mb: 2 }}>{errors.maThuTucHanhChinh}</Alert>
+            )}
 
             <Box sx={{ border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>THỦ TỤC HÀNH CHÍNH</Typography>

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Stepper, Step, StepLabel, Paper, Typography, Button, CircularProgress, Container } from '@mui/material';
+import { Box, Stepper, Step, StepLabel, Paper, Typography, Button, CircularProgress, Container, Alert } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-// Import các component cho từng bước
 import Step1ChonThuTuc from '../components/hoso/Step1_ChonThuTuc';
-// (Sau này chúng ta sẽ import thêm các component Step khác ở đây)
+import Step2_NhapThongTin from '../components/hoso/Step2_NhapThongTin';
 
 const steps = ['Chọn thủ tục', 'Nhập thông tin', 'Đính kèm giấy tờ', 'Xem lại và nộp', 'Hoàn thành'];
 
@@ -16,7 +15,7 @@ const NopHoSoPage = () => {
         nguoiNopDon: {
             hoTen: '',
             gioiTinh: 1,
-            ngaySinh: null,
+            ngaySinh: '',
             namSinh: '',
             soCCCD: '',
             soDienThoai: '',
@@ -30,45 +29,83 @@ const NopHoSoPage = () => {
         },
         giayToDinhKem: [],
     });
-
-    console.log("NopHoSoPage re-rendered. Current formData:", formData);
     const [soBienNhan, setSoBienNhan] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // <<< STATE ĐỂ LƯU LỖI VALIDATION >>>
+    const [errors, setErrors] = useState({});
+    // <<< STATE ĐỂ BIẾT KHI NÀO CẦN HIỂN THỊ LỖI >>>
+    const [showValidation, setShowValidation] = useState(false);
 
-    // Hàm này sẽ nhận dữ liệu từ các bước con và cập nhật vào state formData
     const handleDataChange = (stepData) => {
-        console.log("handleDataChange called with:", stepData); // Kiểm tra xem hàm có được gọi không
         setFormData(prevFormData => ({
             ...prevFormData,
             ...stepData
         }));
+        // Khi người dùng thay đổi dữ liệu, ta có thể ẩn thông báo lỗi cũ đi
+        if (showValidation) {
+            setShowValidation(false);
+            setErrors({});
+        }
+    };
+
+    const validateStep = () => {
+        let tempErrors = {};
+        let isValid = true;
+
+        if (activeStep === 0) {
+            if (!formData.maThuTucHanhChinh) {
+                tempErrors.maThuTucHanhChinh = "Vui lòng chọn một thủ tục hành chính.";
+                isValid = false;
+            }
+        } else if (activeStep === 1) {
+            const { nguoiNopDon, thongTinThuaDat } = formData;
+            if (!nguoiNopDon.hoTen?.trim()) tempErrors.hoTen = "Họ tên là bắt buộc.";
+            if (!nguoiNopDon.soCCCD?.trim()) tempErrors.soCCCD = "Số CCCD là bắt buộc.";
+            if (!nguoiNopDon.soDienThoai?.trim()) tempErrors.soDienThoai = "Số điện thoại là bắt buộc.";
+            if (!thongTinThuaDat.soThuTuThua?.trim()) tempErrors.soThuTuThua = "Số thứ tự thửa là bắt buộc.";
+            if (!thongTinThuaDat.soHieuToBanDo?.trim()) tempErrors.soHieuToBanDo = "Số hiệu tờ bản đồ là bắt buộc.";
+            
+            if (Object.keys(tempErrors).length > 0) isValid = false;
+        }
+        
+        setErrors(tempErrors);
+        return isValid;
     };
     
     const handleNext = () => {
-        // (Logic này sẽ được hoàn thiện sau)
-        if (activeStep === steps.length - 2) {
-            console.log("Submitting form:", formData);
+        setShowValidation(true); // Bật chế độ hiển thị lỗi
+        const isStepValid = validateStep();
+
+        if (isStepValid) {
+            setShowValidation(false); // Tắt hiển thị lỗi khi qua bước mới
+            setErrors({}); // Xóa lỗi cũ
+            if (activeStep === steps.length - 2) {
+                console.log("Submitting form:", formData);
+            }
+            setActiveStep((prev) => prev + 1);
         }
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
 
     const handleBack = () => {
+        setShowValidation(false); // Không hiển thị lỗi khi quay lại
+        setErrors({});
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
-
+    
     const getStepContent = (step) => {
         switch (step) {
             case 0:
-                // Truyền formData và hàm callback onDataChange xuống cho component con
-                return <Step1ChonThuTuc formData={formData} onDataChange={handleDataChange} />;
+                // Truyền các props cần thiết xuống
+                return <Step1ChonThuTuc formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
             case 1:
-                return <Typography>Nội dung Bước 2: Nhập thông tin</Typography>; // Placeholder
+                return <Step2_NhapThongTin formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
             case 2:
-                return <Typography>Nội dung Bước 3: Đính kèm giấy tờ</Typography>; // Placeholder
+                return <Typography>Nội dung Bước 3: Đính kèm giấy tờ</Typography>; 
             case 3:
-                return <Typography>Nội dung Bước 4: Xem lại và nộp</Typography>; // Placeholder
+                return <Typography>Nội dung Bước 4: Xem lại và nộp</Typography>; 
             case 4:
-                return <Typography>Hoàn thành! Mã hồ sơ của bạn là: {soBienNhan}</Typography>; // Placeholder
+                return <Typography>Hoàn thành! Mã hồ sơ của bạn là: {soBienNhan}</Typography>;
             default:
                 return <Typography>Bước không xác định</Typography>;
         }
@@ -78,22 +115,17 @@ const NopHoSoPage = () => {
         <Container maxWidth="md">
             <Paper sx={{ p: 3, my: 3, boxShadow: '0 8px 16px 0 rgba(0,0,0,0.1)' }}>
                 <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-                    {steps.map((label, index) => {
-                        const stepProps = {};
-                        const labelProps = {};
-                        return (
-                            <Step key={label} {...stepProps}>
-                                <StepLabel {...labelProps}>{label}</StepLabel>
-                            </Step>
-                        );
-                    })}
+                    {steps.map((label) => (
+                        <Step key={label}>
+                            <StepLabel>{label}</StepLabel>
+                        </Step>
+                    ))}
                 </Stepper>
 
                 <Box minHeight="400px">
                     {getStepContent(activeStep)}
                 </Box>
                 
-                {/* Nút điều hướng */}
                 {activeStep < steps.length - 1 && (
                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                         <Button
@@ -109,7 +141,7 @@ const NopHoSoPage = () => {
                             variant="contained"
                             onClick={handleNext}
                             endIcon={isSubmitting ? null : <ArrowForwardIcon />}
-                            disabled={isSubmitting || (activeStep === 0 && !formData.maThuTucHanhChinh)}
+                            disabled={isSubmitting} // Chỉ disable khi đang submit
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : (activeStep === steps.length - 2 ? 'Nộp hồ sơ' : 'Tiếp tục')}
                         </Button>
