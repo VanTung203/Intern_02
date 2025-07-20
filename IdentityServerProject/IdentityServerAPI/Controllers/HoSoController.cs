@@ -1,4 +1,6 @@
+using IdentityServerAPI.DTOs.HoSo;
 using IdentityServerAPI.Models;
+using IdentityServerAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -11,11 +13,13 @@ namespace IdentityServerAPI.Controllers
     {
         private readonly IMongoCollection<HoSo> _hoSoCollection;
         private readonly ILogger<HoSoController> _logger;
+        private readonly IHoSoService _hoSoService;
 
-        public HoSoController(IMongoDatabase database, ILogger<HoSoController> logger)
+        public HoSoController(IMongoDatabase database, ILogger<HoSoController> logger, IHoSoService hoSoService)
         {
             _hoSoCollection = database.GetCollection<HoSo>("HoSo");
             _logger = logger;
+            _hoSoService = hoSoService;
         }
 
         [AllowAnonymous]
@@ -45,9 +49,15 @@ namespace IdentityServerAPI.Controllers
             }
         }
         
-        // Các API khác cho việc nộp hồ sơ, xem chi tiết... sẽ được thêm vào đây sau.
-        // [Authorize]
-        // [HttpPost("submit")]
-        // public async Task<IActionResult> SubmitHoSo...
+        [Authorize] // <<< THÊM ENDPOINT MỚI
+        [HttpPost("submit")] // POST /api/hoso/submit
+        public async Task<IActionResult> Submit([FromBody] SubmitHoSoDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return await _hoSoService.SubmitHoSoAsync(dto, User);
+        }
     }
 }

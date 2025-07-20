@@ -1,10 +1,9 @@
 // IdentityServerAPI/Models/ApplicationUser.cs
-using AspNetCore.Identity.MongoDbCore.Models; // THÊM USING NÀY
-//using System; // Cho Guid
+using AspNetCore.Identity.MongoDbCore.Models;
 
 namespace IdentityServerAPI.Models
 {
-    // SỬA ĐỔI: Kế thừa từ MongoIdentityUser và sử dụng Guid làm kiểu khóa
+    // Kế thừa từ MongoIdentityUser và sử dụng Guid làm kiểu khóa
     public class ApplicationUser : MongoIdentityUser<Guid>
     {
         public string FirstName { get; set; } = string.Empty;
