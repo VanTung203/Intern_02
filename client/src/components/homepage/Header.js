@@ -73,11 +73,11 @@ const Header = () => {
                 <Button component={RouterLink} to="/" sx={{ color: 'white' }} startIcon={<HomeIcon />}>
                     Trang chủ
                 </Button>
-                <Button component={RouterLink} to="/nop-ho-so" sx={{ color: 'grey.300' }}>Nộp hồ sơ</Button>
-                <Button component={RouterLink} to="/tra-cuu-ho-so" sx={{ color: 'grey.300' }}>Tra cứu hồ sơ</Button>
-                <Button component={RouterLink} to="/tra-cuu-thua-dat" sx={{ color: 'grey.300' }}>Thông tin thửa đất</Button>
-                <Button component={RouterLink} to="/ban-tin" sx={{ color: 'grey.300' }}>Bản tin pháp luật</Button>
-                <Button component={RouterLink} to="/van-ban" sx={{ color: 'grey.300' }}>Văn bản pháp luật</Button>
+                <Button component={RouterLink} to="/nop-ho-so" sx={{ color: 'white' }}>Nộp hồ sơ</Button>
+                <Button component={RouterLink} to="/tra-cuu-ho-so" sx={{ color: 'white' }}>Tra cứu hồ sơ</Button>
+                <Button component={RouterLink} to="/tra-cuu-thua-dat" sx={{ color: 'white' }}>Thông tin thửa đất</Button>
+                <Button component={RouterLink} to="/ban-tin" sx={{ color: 'white' }}>Bản tin pháp luật</Button>
+                <Button component={RouterLink} to="/van-ban" sx={{ color: 'white' }}>Văn bản pháp luật</Button>
             </Toolbar>
         </Container>
       </AppBar>

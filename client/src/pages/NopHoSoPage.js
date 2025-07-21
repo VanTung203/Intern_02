@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Stepper, Step, StepLabel, Paper, Typography, Button, CircularProgress, Container, Alert } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -6,8 +6,11 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Step1ChonThuTuc from '../components/hoso/Step1_ChonThuTuc';
 import Step2_NhapThongTin from '../components/hoso/Step2_NhapThongTin';
 import Step3_DinhKemGiayTo from '../components/hoso/Step3_DinhKemGiayTo';
+import Step4_XemLaiVaNop from '../components/hoso/Step4_XemLaiVaNop'; // <<< IMPORT MỚI
+import Step5_HoanThanh from '../components/hoso/Step5_HoanThanh';   // <<< IMPORT MỚI
+import hoSoService from '../services/hoSoService';
 
-const steps = ['Chọn thủ tục', 'Nhập thông tin', 'Đính kèm giấy tờ', 'Xem lại và nộp', 'Hoàn thành'];
+const steps = ['Chọn thủ tục', 'Nhập thông tin', 'Đính kèm giấy tờ', 'Kiểm tra hồ sơ', 'Hoàn thành'];
 
 const NopHoSoPage = () => {
     const [activeStep, setActiveStep] = useState(0);
@@ -37,6 +40,25 @@ const NopHoSoPage = () => {
     const [errors, setErrors] = useState({});
     // <<< STATE ĐỂ BIẾT KHI NÀO CẦN HIỂN THỊ LỖI >>>
     const [showValidation, setShowValidation] = useState(false);
+
+    // <<< THÊM CÁC STATE NÀY VÀO >>>
+    const [thuTucList, setThuTucList] = useState([]);
+    const [submitError, setSubmitError] = useState('');
+
+    // <<< THÊM useEffect ĐỂ TẢI DANH SÁCH THỦ TỤC >>>
+    useEffect(() => {
+        const fetchThuTuc = async () => {
+            try {
+                const response = await hoSoService.getThuTucHanhChinh();
+                if (Array.isArray(response.data)) {
+                    setThuTucList(response.data);
+                }
+            } catch (err) {
+                console.error("Không thể tải danh sách thủ tục:", err);
+            }
+        };
+        fetchThuTuc();
+    }, []);
 
     const handleDataChange = (stepData) => {
         setFormData(prevFormData => ({
@@ -92,17 +114,59 @@ const NopHoSoPage = () => {
         return isValid;
     };
     
-    const handleNext = () => {
-        setShowValidation(true); // Bật chế độ hiển thị lỗi
-        const isStepValid = validateStep();
+    const handleNext = async () => {
+        const isCurrentStepValid = validateStep();
+        setShowValidation(true); 
 
-        if (isStepValid) {
-            setShowValidation(false); // Tắt hiển thị lỗi khi qua bước mới
-            setErrors({}); // Xóa lỗi cũ
-            if (activeStep === steps.length - 2) {
-                console.log("Submitting form:", formData);
+        if (isCurrentStepValid) {
+            // setShowValidation(false);
+            // setErrors({});
+            
+            // Xử lý submit ở bước "Kiểm tra hồ sơ" (index 3)
+            if (activeStep === steps.length - 2) { 
+                setIsSubmitting(true);
+                setSubmitError('');
+                
+                const payload = {
+                    maThuTucHanhChinh: formData.maThuTucHanhChinh,
+                    // Object NguoiNopDon lồng nhau
+                    nguoiNopDon: {
+                        hoTen: formData.nguoiNopDon.hoTen,
+                        gioiTinh: parseInt(formData.nguoiNopDon.gioiTinh, 10),
+                        ngaySinh: formData.nguoiNopDon.ngaySinh || null,
+                        namSinh: formData.nguoiNopDon.namSinh ? parseInt(formData.nguoiNopDon.namSinh, 10) : null,
+                        soCCCD: formData.nguoiNopDon.soCCCD,
+                        diaChi: formData.nguoiNopDon.diaChi,
+                        soDienThoai: formData.nguoiNopDon.soDienThoai,
+                        email: formData.nguoiNopDon.email,
+                    },
+                    // Object ThongTinThuaDat lồng nhau
+                    thongTinThuaDat: {
+                        soThuTuThua: formData.thongTinThuaDat.soThuTuThua,
+                        soHieuToBanDo: formData.thongTinThuaDat.soHieuToBanDo,
+                        diaChi: formData.thongTinThuaDat.diaChi,
+                    },
+                    giayToDinhKem: formData.giayToDinhKem.map(gt => ({
+                        tenLoaiGiayTo: gt.tenLoaiGiayTo,
+                        duongDanTapTin: gt.duongDanTapTin
+                    })),
+                };
+
+                console.log("Submitting NESTED payload:", JSON.stringify(payload, null, 2));
+
+                try {
+                    const response = await hoSoService.submitHoSo(payload);
+                    setSoBienNhan(response.data.soBienNhan);
+                    setActiveStep((prev) => prev + 1);
+                } catch (error) {
+                    console.error("Submit error:", error.response?.data || error);
+                    setSubmitError(error.response?.data?.message || "Nộp hồ sơ thất bại. Vui lòng thử lại.");
+                } finally {
+                    setIsSubmitting(false);
+                }
+            } else {
+                setActiveStep((prev) => prev + 1);
             }
-            setActiveStep((prev) => prev + 1);
         }
     };
 
@@ -115,16 +179,18 @@ const NopHoSoPage = () => {
     const getStepContent = (step) => {
         switch (step) {
             case 0:
-                // Truyền các props cần thiết xuống
-                return <Step1ChonThuTuc formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
+                // Thêm prop thuTucList
+                return <Step1ChonThuTuc formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} thuTucList={thuTucList} />;
             case 1:
                 return <Step2_NhapThongTin formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
             case 2:
                 return <Step3_DinhKemGiayTo formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
             case 3:
-                return <Typography>Nội dung Bước 4: Xem lại và nộp</Typography>; 
+                // Thêm Step4
+                return <Step4_XemLaiVaNop formData={formData} thuTucList={thuTucList} />; 
             case 4:
-                return <Typography>Hoàn thành! Mã hồ sơ của bạn là: {soBienNhan}</Typography>;
+                // Thêm Step5
+                return <Step5_HoanThanh soBienNhan={soBienNhan} />;
             default:
                 return <Typography>Bước không xác định</Typography>;
         }
@@ -142,6 +208,8 @@ const NopHoSoPage = () => {
                 </Stepper>
 
                 <Box minHeight="400px">
+                    {/* Thêm hiển thị lỗi submit */}
+                    {submitError && activeStep === 3 && <Alert severity="error" sx={{ mb: 2 }}>{submitError}</Alert>}
                     {getStepContent(activeStep)}
                 </Box>
                 

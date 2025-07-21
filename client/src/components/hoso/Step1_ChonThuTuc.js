@@ -1,40 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, TextField, RadioGroup, FormControlLabel, Radio, CircularProgress, Alert } from '@mui/material';
 import hoSoService from '../../services/hoSoService';
 import LocationSelector from './LocationSelector';
 
-const Step1ChonThuTuc = ({ formData, onDataChange, errors, showValidation }) => {
-    const [thuTucList, setThuTucList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+const Step1ChonThuTuc = ({ formData, onDataChange, errors, showValidation, thuTucList }) => {
+    // const [thuTucList, setThuTucList] = useState([]);
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        const fetchThuTuc = async () => {
-            try {
-                const response = await hoSoService.getThuTucHanhChinh();
-                // Thêm bước kiểm tra để đảm bảo dữ liệu hợp lệ
-                if (Array.isArray(response.data)) {
-                    setThuTucList(response.data);
-                } else {
-                    setError('Dữ liệu thủ tục trả về không hợp lệ.');
-                }
-            } catch (err) {
-                setError('Không thể tải danh sách thủ tục hành chính.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchThuTuc();
-    }, []);
+    // useEffect(() => {
+    //     const fetchThuTuc = async () => {
+    //         try {
+    //             const response = await hoSoService.getThuTucHanhChinh();
+    //             // Thêm bước kiểm tra để đảm bảo dữ liệu hợp lệ
+    //             if (Array.isArray(response.data)) {
+    //                 setThuTucList(response.data);
+    //             } else {
+    //                 setError('Dữ liệu thủ tục trả về không hợp lệ.');
+    //             }
+    //         } catch (err) {
+    //             setError('Không thể tải danh sách thủ tục hành chính.');
+    //             console.error(err);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchThuTuc();
+    // }, []);
 
     const handleLocationSelected = (locationData) => {
         console.log("Location selected:", locationData);
     }
 
-    const filteredThuTuc = thuTucList.filter(tt => 
-        // Thêm kiểm tra tt và tt.ten tồn tại trước khi gọi toLowerCase
+    // <<< DÙNG thuTucList từ props >>>
+    const filteredThuTuc = (thuTucList || []).filter(tt => 
         tt && tt.ten && tt.ten.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -42,8 +42,8 @@ const Step1ChonThuTuc = ({ formData, onDataChange, errors, showValidation }) => 
         onDataChange({ maThuTucHanhChinh: event.target.value });
     };
 
-    if (loading) return <CircularProgress />;
-    if (error) return <Alert severity="error">{error}</Alert>;
+    // if (loading) return <CircularProgress />;
+    // if (error) return <Alert severity="error">{error}</Alert>;
 
     return (
         <Box>
