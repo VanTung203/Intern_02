@@ -5,6 +5,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import Step1ChonThuTuc from '../components/hoso/Step1_ChonThuTuc';
 import Step2_NhapThongTin from '../components/hoso/Step2_NhapThongTin';
+import Step3_DinhKemGiayTo from '../components/hoso/Step3_DinhKemGiayTo';
 
 const steps = ['Chọn thủ tục', 'Nhập thông tin', 'Đính kèm giấy tờ', 'Xem lại và nộp', 'Hoàn thành'];
 
@@ -58,7 +59,8 @@ const NopHoSoPage = () => {
                 tempErrors.maThuTucHanhChinh = "Vui lòng chọn một thủ tục hành chính.";
                 isValid = false;
             }
-        } else if (activeStep === 1) {
+        } 
+        else if (activeStep === 1) {
             const { nguoiNopDon, thongTinThuaDat } = formData;
             if (!nguoiNopDon.hoTen?.trim()) tempErrors.hoTen = "Họ tên là bắt buộc.";
             if (!nguoiNopDon.soCCCD?.trim()) tempErrors.soCCCD = "Số CCCD là bắt buộc.";
@@ -68,7 +70,24 @@ const NopHoSoPage = () => {
             
             if (Object.keys(tempErrors).length > 0) isValid = false;
         }
-        
+        // Validation cho BƯỚC 3: Đính kèm giấy tờ
+        else if (activeStep === 2) {
+            // Yêu cầu phải có ít nhất 1 giấy tờ
+            if (formData.giayToDinhKem.length === 0) {
+                tempErrors.giayTo = "Vui lòng thêm ít nhất một giấy tờ đính kèm.";
+                isValid = false;
+            } else {
+                // Kiểm tra xem tất cả các dòng đã thêm có hợp lệ không
+                const isAllRowsValid = formData.giayToDinhKem.every(gt => 
+                    gt.tenLoaiGiayTo.trim() !== '' && gt.duongDanTapTin !== ''
+                );
+                if (!isAllRowsValid) {
+                    tempErrors.giayTo = "Vui lòng nhập tên và tải lên đầy đủ tập tin cho tất cả các giấy tờ.";
+                    isValid = false;
+                }
+            }
+        }
+ 
         setErrors(tempErrors);
         return isValid;
     };
@@ -101,7 +120,7 @@ const NopHoSoPage = () => {
             case 1:
                 return <Step2_NhapThongTin formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
             case 2:
-                return <Typography>Nội dung Bước 3: Đính kèm giấy tờ</Typography>; 
+                return <Step3_DinhKemGiayTo formData={formData} onDataChange={handleDataChange} errors={errors} showValidation={showValidation} />;
             case 3:
                 return <Typography>Nội dung Bước 4: Xem lại và nộp</Typography>; 
             case 4:
