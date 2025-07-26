@@ -1,10 +1,12 @@
+// IdentityServerProject/IdentityServerAPI/Enums/HoSoStatus.cs
+// Mục đích: Định nghĩa vòng đời hồ sơ 4 trạng thái theo mô hình mới nhất.
 namespace IdentityServerAPI.Enums
 {
     public enum HoSoStatus
     {
-        DangXuLy = 1,     // Đang thụ lý
-        DaTra = 2,          // Đã trả
-        TuChoi = 3,         // Bị từ chối
-        YeuCauBoSung = 4  // Yêu cầu bổ sung
+        DaNop = 0,               // Người dùng vừa nộp, chờ cán bộ xem
+        DaTiepNhanVaXuLy = 1,    // Cán bộ đã tiếp nhận và đang xử lý
+        DaTra = 2,               // Đã hoàn thành và trả kết quả
+        TuChoi = 3               // Hồ sơ bị từ chối
     }
 }

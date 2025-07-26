@@ -1,3 +1,4 @@
+// IdentityServerProject/IdentityServerAPI/Services/HomepageService.cs
 using IdentityServerAPI.DTOs.Homepage;
 using IdentityServerAPI.Enums;
 using IdentityServerAPI.Models;
@@ -28,15 +29,18 @@ namespace IdentityServerAPI.Services
             try
             {
                 var total = await _hoSoCollection.CountDocumentsAsync(_ => true);
-                var completed = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaTra);
-                var processing = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DangXuLy);
-                // Hoặc tính toán: var processing = total - completed;
+                var choTiepNhan = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaNop);
+                var dangThuLy = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaTiepNhanVaXuLy);
+                var daTraFilter = Builders<HoSo>.Filter.In(h => h.TrangThaiHoSo, new[] { HoSoStatus.DaTra, HoSoStatus.TuChoi });
+                var daTra = await _hoSoCollection.CountDocumentsAsync(daTraFilter);
 
                 var stats = new HomepageStatsDto
                 {
-                    SoHoSoTiepNhan = total,
-                    SoHoSoDaTra = completed,
-                    SoHoSoDangThuLy = processing
+                    // DTO đã được cập nhật ở lần trước, ta chỉ cần gán giá trị
+                    TongSoHoSo = total,
+                    SoHoSoChoTiepNhan = choTiepNhan,
+                    SoHoSoDangThuLy = dangThuLy,
+                    SoHoSoDaTra = daTra // Gán giá trị mới đã được tính toán
                 };
 
                 return new OkObjectResult(stats);

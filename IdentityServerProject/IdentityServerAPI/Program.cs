@@ -376,22 +376,30 @@ async Task SeedDatabaseAsync(IServiceProvider services)
         logger.LogInformation("Seeded {Count} legal documents.", sampleDocs.Count);
     }
     
-    // Seed Hồ Sơ (để có dữ liệu thống kê)
+    // Seed Hồ Sơ
     var hoSoCollection = database.GetCollection<HoSo>("HoSo");
     if (await hoSoCollection.CountDocumentsAsync(_ => true) == 0)
     {
-        logger.LogInformation("Seeding sample Ho So records...");
-        // Lấy admin user để gán làm chủ hồ sơ
+        logger.LogInformation("Seeding sample Ho So records with new status model...");
         var adminUser = await userManager.FindByEmailAsync(configuration["SeedAdminUser:Email"]);
         if(adminUser != null)
         {
             var sampleHoSo = new List<HoSo>
             {
-                new HoSo { SoBienNhan = "HS00001", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DangXuLy },
-                new HoSo { SoBienNhan = "HS00002", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DangXuLy },
-                new HoSo { SoBienNhan = "HS00003", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTra },
-                new HoSo { SoBienNhan = "HS00004", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DangXuLy },
-                new HoSo { SoBienNhan = "HS00005", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTra }
+                // 2 hồ sơ đang được xử lý
+                new HoSo { SoBienNhan = "HS00001", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTiepNhanVaXuLy, NgayTiepNhan = DateTime.UtcNow.AddDays(-2) },
+                new HoSo { SoBienNhan = "HS00002", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTiepNhanVaXuLy, NgayTiepNhan = DateTime.UtcNow.AddDays(-1) },
+                
+                // 2 hồ sơ đã trả
+                new HoSo { SoBienNhan = "HS00003", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTra, NgayTiepNhan = DateTime.UtcNow.AddDays(-5), NgayHenTra = DateTime.UtcNow.AddDays(-1) },
+                new HoSo { SoBienNhan = "HS00004", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaTra, NgayTiepNhan = DateTime.UtcNow.AddDays(-4), NgayHenTra = DateTime.UtcNow },
+                
+                // 1 hồ sơ bị từ chối
+                new HoSo { SoBienNhan = "HS00005", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.TuChoi, LyDoTuChoi = "Giấy tờ không hợp lệ." },
+                
+                // 2 hồ sơ mới nộp, đang chờ tiếp nhận
+                new HoSo { SoBienNhan = "HS00006", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaNop },
+                new HoSo { SoBienNhan = "HS00007", UserId = adminUser.Id, TrangThaiHoSo = HoSoStatus.DaNop }
             };
             await hoSoCollection.InsertManyAsync(sampleHoSo);
             logger.LogInformation("Seeded {Count} Ho So records.", sampleHoSo.Count);

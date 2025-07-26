@@ -1,3 +1,4 @@
+// IdentityServerProject/IdentityServerAPI/Services/HoSoService.cs
 using IdentityServerAPI.DTOs.HoSo;
 using IdentityServerAPI.Enums;
 using IdentityServerAPI.Models;
@@ -101,9 +102,8 @@ namespace IdentityServerAPI.Services
             }
 
             // Sử dụng transaction để đảm bảo toàn vẹn dữ liệu: hoặc tất cả cùng thành công, hoặc không có gì được lưu.
-            // Điều này yêu cầu MongoDB của bạn phải chạy dưới dạng replica set.
-            // Nếu không, bạn có thể bỏ qua phần transaction và chấp nhận rủi ro (hiếm gặp) là dữ liệu có thể không nhất quán nếu có lỗi giữa chừng.
-            // Tôi sẽ viết code không có transaction để đảm bảo nó chạy trên mọi môi trường MongoDB.
+            // Điều này yêu cầu MongoDB phải chạy dưới dạng replica set.
+            // Nếu không, có thể bỏ qua phần transaction và chấp nhận rủi ro (hiếm gặp) là dữ liệu có thể không nhất quán nếu có lỗi giữa chừng.
 
             try
             {
@@ -116,7 +116,7 @@ namespace IdentityServerAPI.Services
                     SoBienNhan = soBienNhan,
                     MaThuTucHanhChinh = dto.MaThuTucHanhChinh,
                     NgayNopHoSo = DateTime.UtcNow,
-                    TrangThaiHoSo = Enums.HoSoStatus.DangXuLy,
+                    TrangThaiHoSo = Enums.HoSoStatus.DaNop,
                     // Các trường nullable sẽ được admin cập nhật sau
                     NgayTiepNhan = null,
                     NgayHenTra = null,
@@ -174,7 +174,7 @@ namespace IdentityServerAPI.Services
                 return new ObjectResult(new { message = "Đã xảy ra lỗi trong quá trình nộp hồ sơ. Vui lòng thử lại." }) { StatusCode = 500 };
             }
         }
-        
+
         // Phương thức tra cứu thông tin hồ sơ
         public async Task<HoSoDetailsDto?> GetHoSoDetailsAsync(string receiptNumber, string cccd)
         {
@@ -243,7 +243,7 @@ namespace IdentityServerAPI.Services
                     {
                         TenLoaiGiayTo = g.TenLoaiGiayTo,
                         DuongDanTapTin = g.DuongDanTapTin,
-                        FileName = Path.GetFileName(g.DuongDanTapTin) 
+                        FileName = Path.GetFileName(g.DuongDanTapTin)
                     }).ToList()
                 };
 
@@ -251,11 +251,35 @@ namespace IdentityServerAPI.Services
             }
             catch (Exception ex)
             {
-                 _logger.LogError(ex, "Lỗi nghiêm trọng khi tra cứu chi tiết hồ sơ {ReceiptNumber}", receiptNumber);
-                 return null; // Trả về null nếu có lỗi hệ thống
+                _logger.LogError(ex, "Lỗi nghiêm trọng khi tra cứu chi tiết hồ sơ {ReceiptNumber}", receiptNumber);
+                return null; // Trả về null nếu có lỗi hệ thống
             }
         }
-        
+
+        // Phương thức xử lý tra cứu nhanh thông tin hồ sơ
+        public async Task<HoSoLookupResultDto?> LookupHoSoByReceiptNumberAsync(string receiptNumber)
+        {
+            var hoSo = await _hoSoCollection
+                .Find(h => h.SoBienNhan.ToLower() == receiptNumber.Trim().ToLower())
+                .FirstOrDefaultAsync();
+
+            if (hoSo == null)
+            {
+                return null;
+            }
+
+            // Tái sử dụng hàm helper để lấy tên trạng thái chính xác
+            var tenTrangThai = GetTenTrangThaiHoSo(hoSo.TrangThaiHoSo);
+
+            // Ánh xạ kết quả sang DTO mới
+            return new HoSoLookupResultDto
+            {
+                SoBienNhan = hoSo.SoBienNhan,
+                TenTrangThaiHoSo = tenTrangThai,
+                NgayNopHoSo = hoSo.NgayNopHoSo
+            };
+        }
+
         // Các phương thức hỗ trợ
         private async Task<string> GetTenThuTucHanhChinhById(string id)
         {
@@ -272,11 +296,10 @@ namespace IdentityServerAPI.Services
         {
             return status switch
             {
-                HoSoStatus.DangXuLy => "Đang xử lý",
-                // HoSoStatus.DaTiepNhan => "Đã tiếp nhận",
+                HoSoStatus.DaNop => "Đã nộp",
+                HoSoStatus.DaTiepNhanVaXuLy => "Đã tiếp nhận",
                 HoSoStatus.DaTra => "Đã trả kết quả",
                 HoSoStatus.TuChoi => "Bị từ chối",
-                HoSoStatus.YeuCauBoSung => "Yêu cầu bổ sung",
                 _ => "Không xác định"
             };
         }

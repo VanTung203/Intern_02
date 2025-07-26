@@ -10,5 +10,6 @@ namespace IdentityServerAPI.Services.Interfaces
         Task<IActionResult> UploadFileAsync(IFormFile file);
         Task<IActionResult> SubmitHoSoAsync(SubmitHoSoDto dto, ClaimsPrincipal user);
         Task<HoSoDetailsDto?> GetHoSoDetailsAsync(string receiptNumber, string cccd);
+        Task<HoSoLookupResultDto?> LookupHoSoByReceiptNumberAsync(string receiptNumber);
     }
 }
