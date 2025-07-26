@@ -1,6 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using IdentityServerAPI.Enums; // Thêm using cho enum
+using IdentityServerAPI.Enums;
 
 namespace IdentityServerAPI.Models
 {
@@ -29,7 +29,7 @@ namespace IdentityServerAPI.Models
         public string MaThuTucHanhChinh { get; set; } = string.Empty;
 
         [BsonElement("TrangThaiHoSo")]
-        public HoSoStatus TrangThaiHoSo { get; set; } = HoSoStatus.DangXuLy;
+        public HoSoStatus TrangThaiHoSo { get; set; } = HoSoStatus.DaNop;
         
         [BsonElement("LyDoTuChoi")]
         public string? LyDoTuChoi { get; set; } // Nullable, chỉ có khi trạng thái là TuChoi

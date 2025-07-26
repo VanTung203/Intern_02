@@ -11,17 +11,19 @@ namespace IdentityServerAPI.Controllers
     [ApiController]
     public class HoSoController : ControllerBase
     {
-        private readonly IMongoCollection<HoSo> _hoSoCollection;
+        // Xóa _hoSoCollection vì logic đã được chuyển hết vào Service
+        // private readonly IMongoCollection<HoSo> _hoSoCollection;
         private readonly ILogger<HoSoController> _logger;
         private readonly IHoSoService _hoSoService;
 
-        public HoSoController(IMongoDatabase database, ILogger<HoSoController> logger, IHoSoService hoSoService)
+        public HoSoController(ILogger<HoSoController> logger, IHoSoService hoSoService)
         {
-            _hoSoCollection = database.GetCollection<HoSo>("HoSo");
+            // _hoSoCollection = database.GetCollection<HoSo>("HoSo");
             _logger = logger;
             _hoSoService = hoSoService;
         }
 
+        // Endpoint tra cứu nhanh thông tin hồ sơ
         [AllowAnonymous]
         [HttpGet("lookup")] // GET /api/hoso/lookup?receiptNumber=xxxx
         public async Task<IActionResult> LookupByReceiptNumber([FromQuery] string receiptNumber)
@@ -33,14 +35,15 @@ namespace IdentityServerAPI.Controllers
 
             try
             {
-                var hoSo = await _hoSoCollection.Find(h => h.SoBienNhan.ToLower() == receiptNumber.Trim().ToLower()).FirstOrDefaultAsync();
+                var result = await _hoSoService.LookupHoSoByReceiptNumberAsync(receiptNumber);
 
-                if (hoSo == null)
+                if (result == null)
                 {
                     return NotFound(new { message = "Không tìm thấy hồ sơ với số biên nhận này." });
                 }
 
-                return Ok(hoSo);
+                // Trả về DTO đã được xử lý, chứa trạng thái dạng chữ
+                return Ok(result); 
             }
             catch (Exception ex)
             {
@@ -49,7 +52,7 @@ namespace IdentityServerAPI.Controllers
             }
         }
 
-        [Authorize] // <<< THÊM ENDPOINT MỚI
+        [Authorize]
         [HttpPost("submit")] // POST /api/hoso/submit
         public async Task<IActionResult> Submit([FromBody] SubmitHoSoDto dto)
         {

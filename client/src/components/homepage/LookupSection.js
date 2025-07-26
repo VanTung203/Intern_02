@@ -75,7 +75,7 @@ const LookupSection = () => {
                     <Typography variant="subtitle1"><strong>Kết quả tra cứu:</strong></Typography>
                     <Typography><strong>Số biên nhận:</strong> {lookupResult.soBienNhan}</Typography>
                     <Typography><strong>Ngày nộp:</strong> {new Date(lookupResult.ngayNopHoSo).toLocaleDateString('vi-VN')}</Typography>
-                    <Typography><strong>Trạng thái:</strong> {lookupResult.trangThaiHoSo === 1 ? 'Đang thụ lý' : 'Đã trả'}</Typography>
+                    <Typography><strong>Trạng thái:</strong> {lookupResult.tenTrangThaiHoSo}</Typography>
                 </Alert>
             )}
         </Paper>
