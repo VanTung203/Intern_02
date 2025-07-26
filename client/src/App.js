@@ -21,6 +21,7 @@ import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import GoogleSigninSuccessPage from './pages/GoogleSigninSuccessPage';
 import HomePage from './pages/homepage/HomePage';
 import NopHoSoPage from './pages/NopHoSoPage';
+import TraCuuHoSoPage from './pages/TraCuuHoSoPage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
@@ -56,6 +57,7 @@ function App() {
           <Route element={<PrivateRoute />}> 
             <Route path="/nop-ho-so" element={<NopHoSoPage />} />
           </Route>
+          <Route path="/tra-cuu-ho-so" element={<TraCuuHoSoPage />} />
         </Route>
 
         <Route path="/register" element={<RegisterPage />} />

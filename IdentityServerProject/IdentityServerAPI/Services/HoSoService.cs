@@ -1,4 +1,5 @@
 using IdentityServerAPI.DTOs.HoSo;
+using IdentityServerAPI.Enums;
 using IdentityServerAPI.Models;
 using IdentityServerAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +44,7 @@ namespace IdentityServerAPI.Services
 
                 var jsonText = await System.IO.File.ReadAllTextAsync(jsonFilePath);
                 var thuTucList = JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                
+
                 return new OkObjectResult(thuTucList);
             }
             catch (Exception ex)
@@ -61,7 +62,7 @@ namespace IdentityServerAPI.Services
             // Cân nhắc thêm giới hạn kích thước file ở đây
             // if (file.Length > 5 * 1024 * 1024) // Ví dụ: 5MB
             //    return new BadRequestObjectResult(new { message = "Kích thước file vượt quá 5MB." });
-            
+
             try
             {
                 var uploadsFolderPath = Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot", "giay-to");
@@ -172,6 +173,112 @@ namespace IdentityServerAPI.Services
                 _logger.LogError(ex, "Lỗi nghiêm trọng khi nộp hồ sơ cho người dùng {UserId}.", user.Id);
                 return new ObjectResult(new { message = "Đã xảy ra lỗi trong quá trình nộp hồ sơ. Vui lòng thử lại." }) { StatusCode = 500 };
             }
+        }
+        
+        // Phương thức tra cứu thông tin hồ sơ
+        public async Task<HoSoDetailsDto?> GetHoSoDetailsAsync(string receiptNumber, string cccd)
+        {
+            try
+            {
+                // 1. Tìm hồ sơ theo số biên nhận
+                var hoSo = await _hoSoCollection.Find(h => h.SoBienNhan.ToLower() == receiptNumber.Trim().ToLower()).FirstOrDefaultAsync();
+                if (hoSo == null)
+                {
+                    _logger.LogInformation("Tra cứu không thành công: Không tìm thấy hồ sơ với số biên nhận {ReceiptNumber}", receiptNumber);
+                    return null; // Không tìm thấy hồ sơ
+                }
+
+                // 2. Tìm người nộp đơn theo HoSoId
+                var nguoiNopDon = await _nguoiNopDonCollection.Find(n => n.HoSoId == hoSo.Id).FirstOrDefaultAsync();
+                if (nguoiNopDon == null)
+                {
+                    _logger.LogError("Lỗi dữ liệu: Hồ sơ {HoSoId} tồn tại nhưng không có người nộp đơn tương ứng.", hoSo.Id);
+                    return null; // Lỗi dữ liệu
+                }
+
+                // 3. **XÁC THỰC BẢO MẬT**: So sánh số CCCD
+                if (nguoiNopDon.SoCCCD.Trim() != cccd.Trim())
+                {
+                    _logger.LogWarning("Tra cứu không thành công: Số CCCD không khớp cho hồ sơ {ReceiptNumber}", receiptNumber);
+                    return null; // Thông tin không khớp, trả về null để bảo mật
+                }
+
+                // 4. Lấy các thông tin liên quan khác
+                var thongTinThuaDat = await _thongTinThuaDatCollection.Find(t => t.HoSoId == hoSo.Id).FirstOrDefaultAsync();
+                var giayToDinhKemList = await _giayToDinhKemCollection.Find(g => g.HoSoId == hoSo.Id).ToListAsync();
+
+                // 5. Lấy tên thủ tục và tên trạng thái
+                var tenThuTuc = await GetTenThuTucHanhChinhById(hoSo.MaThuTucHanhChinh);
+                var tenTrangThai = GetTenTrangThaiHoSo(hoSo.TrangThaiHoSo);
+
+                // 6. Tổng hợp dữ liệu vào DTO để trả về
+                var hoSoDetails = new HoSoDetailsDto
+                {
+                    SoBienNhan = hoSo.SoBienNhan,
+                    NgayNopHoSo = hoSo.NgayNopHoSo,
+                    NgayTiepNhan = hoSo.NgayTiepNhan,
+                    NgayHenTra = hoSo.NgayHenTra,
+                    TrangThaiHoSo = hoSo.TrangThaiHoSo,
+                    TenTrangThaiHoSo = tenTrangThai,
+                    LyDoTuChoi = hoSo.LyDoTuChoi,
+                    TenThuTucHanhChinh = tenThuTuc,
+                    NguoiNopDon = new NguoiNopDonDto
+                    {
+                        HoTen = nguoiNopDon.HoTen,
+                        GioiTinh = nguoiNopDon.GioiTinh,
+                        NgaySinh = nguoiNopDon.NgaySinh,
+                        NamSinh = nguoiNopDon.NamSinh,
+                        SoCCCD = nguoiNopDon.SoCCCD,
+                        DiaChi = nguoiNopDon.DiaChi,
+                        SoDienThoai = nguoiNopDon.SoDienThoai,
+                        Email = nguoiNopDon.Email
+                    },
+                    ThongTinThuaDat = thongTinThuaDat != null ? new ThongTinThuaDatDto
+                    {
+                        SoThuTuThua = thongTinThuaDat.SoThuTuThua,
+                        SoHieuToBanDo = thongTinThuaDat.SoHieuToBanDo,
+                        DiaChi = thongTinThuaDat.DiaChi
+                    } : new ThongTinThuaDatDto(),
+                    GiayToDinhKem = giayToDinhKemList.Select(g => new GiayToDinhKemDto
+                    {
+                        TenLoaiGiayTo = g.TenLoaiGiayTo,
+                        DuongDanTapTin = g.DuongDanTapTin,
+                        FileName = Path.GetFileName(g.DuongDanTapTin) 
+                    }).ToList()
+                };
+
+                return hoSoDetails;
+            }
+            catch (Exception ex)
+            {
+                 _logger.LogError(ex, "Lỗi nghiêm trọng khi tra cứu chi tiết hồ sơ {ReceiptNumber}", receiptNumber);
+                 return null; // Trả về null nếu có lỗi hệ thống
+            }
+        }
+        
+        // Các phương thức hỗ trợ
+        private async Task<string> GetTenThuTucHanhChinhById(string id)
+        {
+            var jsonFilePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Data", "ThuTucHanhChinh.json");
+            if (!System.IO.File.Exists(jsonFilePath)) return "Không xác định";
+
+            var jsonText = await System.IO.File.ReadAllTextAsync(jsonFilePath);
+            var thuTucList = JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return thuTucList?.FirstOrDefault(t => t.Id == id)?.Ten ?? "Không xác định";
+        }
+
+        private string GetTenTrangThaiHoSo(HoSoStatus status)
+        {
+            return status switch
+            {
+                HoSoStatus.DangXuLy => "Đang xử lý",
+                // HoSoStatus.DaTiepNhan => "Đã tiếp nhận",
+                HoSoStatus.DaTra => "Đã trả kết quả",
+                HoSoStatus.TuChoi => "Bị từ chối",
+                HoSoStatus.YeuCauBoSung => "Yêu cầu bổ sung",
+                _ => "Không xác định"
+            };
         }
     }
 }
