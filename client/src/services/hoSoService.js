@@ -22,10 +22,23 @@ const submitHoSo = (data) => {
   return apiClient.post('/hoso/submit', data);
 };
 
+const getHoSoDetails = (receiptNumber, cccd) => {
+  // Sử dụng 'params' để axios tự động tạo query string ?receiptNumber=...&cccd=...
+  return apiClient.get('/hoso/details', {
+    params: {
+      receiptNumber,
+      cccd,
+    },
+  });
+};
+
 const hoSoService = {
   getThuTucHanhChinh,
   uploadFile,
   submitHoSo,
+  getHoSoDetails,
 };
+
+
 
 export default hoSoService;
