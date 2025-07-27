@@ -219,7 +219,7 @@ namespace IdentityServerAPI.Services
             {
                 token = tokenString,
                 expiresIn = expires.ToString("o"),
-                message = "Xác thực thành công.",
+                message = "Đăng nhập thành công.", // Xác thực thành công
                 user = new
                 {
                     id = user.Id.ToString(),

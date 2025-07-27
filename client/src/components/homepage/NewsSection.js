@@ -1,7 +1,7 @@
 // src/components/homepage/NewsSection.js
 import React from 'react';
 import Slider from 'react-slick';
-import { Box, Typography, Card, CardContent } from '@mui/material'; // Xóa CardMedia khỏi import
+import { Box, Typography, Card, CardContent } from '@mui/material';
 
 const NewsSection = ({ news }) => {
     const settings = {
@@ -37,7 +37,6 @@ const NewsSection = ({ news }) => {
             <Slider {...settings}>
                 {news.map((article) => (
                     <Box key={article.id} sx={{ px: 2 }}>
-                        {/* Thay đổi chính ở đây */}
                         <Card sx={{ height: 220, display: 'flex', flexDirection: 'column' }}> {/* Đặt chiều cao cố định cho Card */}
                             <CardContent sx={{ flexGrow: 1 }}> {/* Cho phép CardContent co giãn để lấp đầy thẻ */}
                                 <Typography 
@@ -52,7 +51,7 @@ const NewsSection = ({ news }) => {
                                         '-webkit-line-clamp': '2',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
-                                        minHeight: '2.5em' // Đảm bảo chiều cao tối thiểu cho 2 dòng
+                                        minHeight: '3.5em' // Đảm bảo chiều cao tối thiểu cho 2 dòng
                                     }}
                                 >
                                     {article.tieuDe}
