@@ -94,9 +94,9 @@ const LocationSelector = ({ onLocationChange }) => {
 
 
     return (
-        <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid container spacing={1} sx={{ mb: 2 }}>
             <Grid item xs={12} sm={4}>
-                <FormControl fullWidth>
+                <FormControl fullWidth sx={{ minWidth: '300px' }}>
                     <InputLabel>Tỉnh/Thành phố *</InputLabel>
                     <Select
                         value={selectedProvince}
@@ -114,7 +114,7 @@ const LocationSelector = ({ onLocationChange }) => {
                 </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
-                <FormControl fullWidth disabled={!selectedProvince || loading.districts}>
+                <FormControl fullWidth sx={{ minWidth: '300px' }} disabled={!selectedProvince || loading.districts}>
                     <InputLabel>Quận/Huyện *</InputLabel>
                     <Select
                         value={selectedDistrict}
@@ -131,7 +131,7 @@ const LocationSelector = ({ onLocationChange }) => {
                 </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
-                <FormControl fullWidth disabled={!selectedDistrict || loading.wards}>
+                <FormControl fullWidth sx={{ minWidth: '300px' }} disabled={!selectedDistrict || loading.wards}>
                     <InputLabel>Phường/Xã *</InputLabel>
                     <Select
                         value={selectedWard}

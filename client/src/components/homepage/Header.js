@@ -75,7 +75,7 @@ const Header = () => {
                 </Button>
                 <Button component={RouterLink} to="/nop-ho-so" sx={{ color: 'white' }}>Nộp hồ sơ</Button>
                 <Button component={RouterLink} to="/tra-cuu-ho-so" sx={{ color: 'white' }}>Tra cứu hồ sơ</Button>
-                <Button component={RouterLink} to="/tra-cuu-thua-dat" sx={{ color: 'white' }}>Thông tin thửa đất</Button>
+                <Button component={RouterLink} to="/tra-cuu-thua-dat" sx={{ color: 'white' }}>Tra cứu thửa đất</Button>
                 <Button component={RouterLink} to="/ban-tin" sx={{ color: 'white' }}>Bản tin pháp luật</Button>
                 <Button component={RouterLink} to="/van-ban" sx={{ color: 'white' }}>Văn bản pháp luật</Button>
             </Toolbar>
