@@ -85,7 +85,7 @@ const theme = createTheme({
             borderRadius: theme.shape.borderRadius,
             backgroundColor: GREY[100], // Nền xám rất nhạt cho input
             '& fieldset': {
-              borderColor: 'transparent', // Bỏ viền
+              // borderColor: 'transparent', // Bỏ viền
             },
             '&:hover fieldset': {
               borderColor: alpha(GREY[500], 0.32), // Viền mờ khi hover
