@@ -65,7 +65,7 @@ const Step1ChonThuTuc = ({ formData, onDataChange, errors, showValidation, thuTu
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{ my: 2 }}
                 />
-                <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                     <RadioGroup
                         value={formData.maThuTucHanhChinh}
                         onChange={handleSelectThuTuc}
