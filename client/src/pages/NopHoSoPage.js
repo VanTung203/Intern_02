@@ -7,14 +7,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Giữ nguyên các component con
+// --- THAY ĐỔI IMPORT THEO YÊU CẦU MỚI ---
 import Step1ChonThuTuc from '../components/hoso/Step1_ChonThuTuc';
-import Step2_NhapThongTin from '../components/hoso/Step2_NhapThongTin';
-import Step3_DinhKemGiayTo from '../components/hoso/Step3_DinhKemGiayTo';
+import Step2_1_ThongTinNguoiNop from '../components/hoso/Step2_1_ThongTinNguoiNop'; // <<< TÊN FILE MỚI
+import Step2_2_ThongTinThuaDat from '../components/hoso/Step2_2_ThongTinThuaDat'; // <<< TÊN FILE MỚI
+import Step3_DinhKemGiayTo from '../components/hoso/Step3_DinhKemGiayTo'; // <<< GIỮ NGUYÊN TÊN FILE
 import Step5_HoanThanh from '../components/hoso/Step5_HoanThanh';
 import hoSoService from '../services/hoSoService';
 
-// Style cho Modal (hộp thoại chỉnh sửa)
 const modalStyle = {
     position: 'absolute',
     top: '50%',
@@ -30,8 +30,7 @@ const modalStyle = {
     overflowY: 'auto'
 };
 
-// Component thẻ cho từng phần của Dashboard
-const SectionCard = ({ title, icon, isCompleted, onEdit, children }) => (
+const SectionCard = ({ title, isCompleted, onEdit, children }) => (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }} variant="outlined">
         <CardContent sx={{ flexGrow: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -43,7 +42,7 @@ const SectionCard = ({ title, icon, isCompleted, onEdit, children }) => (
                     {title}
                 </Typography>
             </Box>
-            <Box sx={{ pl: '32px' /* Căn lề với icon */, color: 'text.secondary' }}>
+            <Box sx={{ pl: '32px', color: 'text.secondary' }}>
                 {children}
             </Box>
         </CardContent>
@@ -56,7 +55,6 @@ const SectionCard = ({ title, icon, isCompleted, onEdit, children }) => (
 );
 
 const NopHoSoPage = () => {
-    // --- State quản lý dữ liệu (giữ nguyên) ---
     const [formData, setFormData] = useState({
         maThuTucHanhChinh: '',
         nguoiNopDon: { hoTen: '', gioiTinh: 1, ngaySinh: '', namSinh: '', soCCCD: '', soDienThoai: '', email: '', diaChi: '' },
@@ -66,18 +64,18 @@ const NopHoSoPage = () => {
     const [thuTucList, setThuTucList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
-    const [submissionResult, setSubmissionResult] = useState(null); // Lưu kết quả sau khi nộp thành công
+    const [submissionResult, setSubmissionResult] = useState(null);
 
-    // --- State quản lý giao diện Dashboard ---
+    // --- THAY ĐỔI STATE: 4 MỤC ---
     const [completedSections, setCompletedSections] = useState({
         thuTuc: false,
-        thongTin: false,
+        nguoiNop: false,
+        thuaDat: false,
         giayTo: false,
     });
-    const [editingSection, setEditingSection] = useState(null); // 'thuTuc', 'thongTin', 'giayTo', or null
+    const [editingSection, setEditingSection] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
 
-    // Tải danh sách thủ tục (giữ nguyên)
     useEffect(() => {
         const fetchThuTuc = async () => {
             try {
@@ -92,39 +90,37 @@ const NopHoSoPage = () => {
         fetchThuTuc();
     }, []);
 
-    // Hàm cập nhật dữ liệu (giữ nguyên)
     const handleDataChange = (stepData) => {
         setFormData(prev => ({ ...prev, ...stepData }));
-        // Khi người dùng sửa, xóa lỗi cũ đi
         if (Object.keys(validationErrors).length > 0) {
             setValidationErrors({});
         }
     };
     
-    // --- Logic cho Dashboard ---
-
     const handleOpenModal = (section) => setEditingSection(section);
     const handleCloseModal = () => {
         setEditingSection(null);
-        setValidationErrors({}); // Xóa lỗi khi đóng modal
+        setValidationErrors({});
     };
 
-    // Hàm kiểm tra và lưu từng phần
+    // --- THAY ĐỔI VALIDATION: TÁCH LOGIC ---
     const handleSaveSection = (section) => {
         let isValid = true;
         let errors = {};
 
-        // 1. Validation cho từng phần
         if (section === 'thuTuc') {
             if (!formData.maThuTucHanhChinh) {
                 errors.maThuTucHanhChinh = "Vui lòng chọn một thủ tục hành chính.";
                 isValid = false;
             }
-        } else if (section === 'thongTin') {
-            const { nguoiNopDon, thongTinThuaDat } = formData;
+        } else if (section === 'nguoiNop') {
+            const { nguoiNopDon } = formData;
             if (!nguoiNopDon.hoTen?.trim()) errors.hoTen = "Họ tên là bắt buộc.";
             if (!nguoiNopDon.soCCCD?.trim()) errors.soCCCD = "Số CCCD là bắt buộc.";
             if (!nguoiNopDon.soDienThoai?.trim()) errors.soDienThoai = "Số điện thoại là bắt buộc.";
+            if (Object.keys(errors).length > 0) isValid = false;
+        } else if (section === 'thuaDat') {
+            const { thongTinThuaDat } = formData;
             if (!thongTinThuaDat.soThuTuThua?.trim()) errors.soThuTuThua = "Số thứ tự thửa là bắt buộc.";
             if (!thongTinThuaDat.soHieuToBanDo?.trim()) errors.soHieuToBanDo = "Số hiệu tờ bản đồ là bắt buộc.";
             if (Object.keys(errors).length > 0) isValid = false;
@@ -138,7 +134,6 @@ const NopHoSoPage = () => {
             }
         }
 
-        // 2. Cập nhật state nếu hợp lệ
         if (isValid) {
             setCompletedSections(prev => ({ ...prev, [section]: true }));
             handleCloseModal();
@@ -147,15 +142,11 @@ const NopHoSoPage = () => {
         }
     };
 
-    // Hàm Nộp hồ sơ cuối cùng
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setSubmitError('');
-
-        // Payload
         const payload = {
             maThuTucHanhChinh: formData.maThuTucHanhChinh,
-            // Object NguoiNopDon lồng nhau
             nguoiNopDon: {
                 hoTen: formData.nguoiNopDon.hoTen,
                 gioiTinh: parseInt(formData.nguoiNopDon.gioiTinh, 10),
@@ -166,7 +157,6 @@ const NopHoSoPage = () => {
                 diaChi: formData.nguoiNopDon.diaChi || null,
                 email: formData.nguoiNopDon.email || null, 
             },
-            // Object ThongTinThuaDat lồng nhau
             thongTinThuaDat: {
                 soThuTuThua: formData.thongTinThuaDat.soThuTuThua,
                 soHieuToBanDo: formData.thongTinThuaDat.soHieuToBanDo,
@@ -189,7 +179,6 @@ const NopHoSoPage = () => {
         }
     };
 
-    // Nếu đã nộp thành công, hiển thị trang hoàn thành
     if (submissionResult) {
         return <Step5_HoanThanh soBienNhan={submissionResult.soBienNhan} />;
     }
@@ -201,51 +190,51 @@ const NopHoSoPage = () => {
         <Container maxWidth="lg" sx={{ py: 1 }}>
             <Paper sx={{ p: { xs: 2, md: 4 }, boxShadow: '0 8px 16px 0 rgba(0,0,0,0.1)' }}>
                 <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Bảng hồ sơ
+                    Bảng điều khiển Hồ sơ
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
                     Hoàn thành các mục dưới đây để nộp hồ sơ của bạn.
                 </Typography>
                 
                 <Grid container spacing={3}>
-                    {/* Card 1: Chọn thủ tục */}
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={6} lg={3}>
                         <SectionCard title="1. Thủ tục hành chính" isCompleted={completedSections.thuTuc} onEdit={() => handleOpenModal('thuTuc')}>
                             {completedSections.thuTuc && selectedThuTuc ? (
                                 <Typography variant="body2">{selectedThuTuc.ten}</Typography>
                             ) : (
-                                <Typography variant="body2">Vui lòng chọn thủ tục bạn muốn thực hiện.</Typography>
+                                <Typography variant="body2">Chọn thủ tục bạn muốn thực hiện.</Typography>
                             )}
                         </SectionCard>
                     </Grid>
-
-                    {/* Card 2: Nhập thông tin */}
-                    <Grid item xs={12} md={4}>
-                        <SectionCard title="2. Thông tin hồ sơ" isCompleted={completedSections.thongTin} onEdit={() => handleOpenModal('thongTin')}>
-                            {completedSections.thongTin ? (
-                                <>
-                                    <Typography variant="body2"><b>Người nộp:</b> {formData.nguoiNopDon.hoTen}</Typography>
-                                    <Typography variant="body2"><b>Số CCCD:</b> {formData.nguoiNopDon.soCCCD}</Typography>
-                                </>
+                    <Grid item xs={12} md={6} lg={3}>
+                        <SectionCard title="2. Thông tin người nộp" isCompleted={completedSections.nguoiNop} onEdit={() => handleOpenModal('nguoiNop')}>
+                            {completedSections.nguoiNop ? (
+                                <Typography variant="body2"><b>Người nộp:</b> {formData.nguoiNopDon.hoTen}</Typography>
                             ) : (
-                                <Typography variant="body2">Cung cấp thông tin người nộp và thông tin thửa đất.</Typography>
+                                <Typography variant="body2">Cung cấp thông tin cá nhân của người nộp đơn.</Typography>
                             )}
                         </SectionCard>
                     </Grid>
-
-                    {/* Card 3: Đính kèm giấy tờ */}
-                    <Grid item xs={12} md={4}>
-                        <SectionCard title="3. Giấy tờ đính kèm" isCompleted={completedSections.giayTo} onEdit={() => handleOpenModal('giayTo')}>
+                    <Grid item xs={12} md={6} lg={3}>
+                        <SectionCard title="3. Thông tin thửa đất" isCompleted={completedSections.thuaDat} onEdit={() => handleOpenModal('thuaDat')}>
+                            {completedSections.thuaDat ? (
+                                 <Typography variant="body2"><b>Số thửa:</b> {formData.thongTinThuaDat.soThuTuThua}, <b>Tờ BĐ:</b> {formData.thongTinThuaDat.soHieuToBanDo}</Typography>
+                            ) : (
+                                <Typography variant="body2">Cung cấp thông tin về thửa đất liên quan.</Typography>
+                            )}
+                        </SectionCard>
+                    </Grid>
+                    <Grid item xs={12} md={6} lg={3}>
+                        <SectionCard title="4. Giấy tờ đính kèm" isCompleted={completedSections.giayTo} onEdit={() => handleOpenModal('giayTo')}>
                             {completedSections.giayTo ? (
                                 <Typography variant="body2">Đã đính kèm {formData.giayToDinhKem.length} giấy tờ.</Typography>
                             ) : (
-                                <Typography variant="body2">Tải lên các giấy tờ cần thiết cho hồ sơ của bạn.</Typography>
+                                <Typography variant="body2">Tải lên các giấy tờ cần thiết cho hồ sơ.</Typography>
                             )}
                         </SectionCard>
                     </Grid>
                 </Grid>
 
-                {/* Nút nộp hồ sơ cuối cùng */}
                 <Box sx={{ mt: 5, pt: 3, borderTop: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
                     {submitError && <Alert severity="error" sx={{ mb: 2 }}>{submitError}</Alert>}
                     <Button
@@ -265,26 +254,23 @@ const NopHoSoPage = () => {
                 </Box>
             </Paper>
 
-            {/* --- MODALS ĐỂ CHỈNH SỬA --- */}
-            {['thuTuc', 'thongTin', 'giayTo'].map(sectionName => (
-                <Modal
-                    key={sectionName}
-                    open={editingSection === sectionName}
-                    onClose={handleCloseModal}
-                    closeAfterTransition
-                >
+            {/* --- THAY ĐỔI LOGIC RENDER MODAL THEO TÊN COMPONENT MỚI --- */}
+            {['thuTuc', 'nguoiNop', 'thuaDat', 'giayTo'].map(sectionName => (
+                <Modal key={sectionName} open={editingSection === sectionName} onClose={handleCloseModal} closeAfterTransition>
                     <Fade in={editingSection === sectionName}>
                         <Box sx={modalStyle}>
                             <IconButton onClick={handleCloseModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
                                 <CloseIcon />
                             </IconButton>
                             
-                            {/* Render component tương ứng */}
                             {sectionName === 'thuTuc' && (
                                 <Step1ChonThuTuc formData={formData} onDataChange={handleDataChange} errors={validationErrors} showValidation={Object.keys(validationErrors).length > 0} thuTucList={thuTucList} />
                             )}
-                            {sectionName === 'thongTin' && (
-                                <Step2_NhapThongTin formData={formData} onDataChange={handleDataChange} errors={validationErrors} showValidation={Object.keys(validationErrors).length > 0} />
+                            {sectionName === 'nguoiNop' && (
+                                <Step2_1_ThongTinNguoiNop formData={formData} onDataChange={handleDataChange} errors={validationErrors} showValidation={Object.keys(validationErrors).length > 0} />
+                            )}
+                             {sectionName === 'thuaDat' && (
+                                <Step2_2_ThongTinThuaDat formData={formData} onDataChange={handleDataChange} errors={validationErrors} showValidation={Object.keys(validationErrors).length > 0} />
                             )}
                             {sectionName === 'giayTo' && (
                                 <Step3_DinhKemGiayTo formData={formData} onDataChange={handleDataChange} errors={validationErrors} showValidation={Object.keys(validationErrors).length > 0} />
