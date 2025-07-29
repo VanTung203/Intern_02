@@ -8,7 +8,6 @@ namespace IdentityServerAPI.DTOs.HoSo
         public string SoThuTuThua { get; set; } = string.Empty;
         [Required]
         public string SoHieuToBanDo { get; set; } = string.Empty;
-        [Required]
-        public string DiaChi { get; set; } = string.Empty;
+        public string? DiaChi { get; set; } 
     }
 }
