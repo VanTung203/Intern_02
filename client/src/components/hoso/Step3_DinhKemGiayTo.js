@@ -1,16 +1,53 @@
 import React, { useState } from 'react';
 import {
     Box, Typography, Button, IconButton, Paper, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, TextField, CircularProgress, Link as MuiLink, Alert
+    TableContainer, TableHead, TableRow, TextField, CircularProgress, Alert,
+    Modal, Fade
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
 import hoSoService from '../../services/hoSoService';
+
+// Style cho Modal xem trước file
+const viewerModalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: { xs: '95%', md: '80%' }, // Responsive
+    height: { xs: '80%', md: '90%' },
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 2,
+    borderRadius: 2,
+    display: 'flex',
+    flexDirection: 'column'
+};
 
 const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation }) => {
     const [uploadingState, setUploadingState] = useState({});
+
+    const [viewingFile, setViewingFile] = useState(null); // State để lưu thông tin file đang xem
+
+    const handleOpenFileViewer = (file) => {
+        setViewingFile(file);
+    };
+
+    const handleCloseFileViewer = () => {
+        setViewingFile(null);
+    };
+
+    // Hàm kiểm tra xem file có thể xem trực tiếp trong trình duyệt không
+    const isViewableInBrowser = (fileName) => {
+        if (!fileName) return false;
+        const lowerCaseName = fileName.toLowerCase();
+        const viewableExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.txt', '.svg', '.webp'];
+        return viewableExtensions.some(ext => lowerCaseName.endsWith(ext));
+    };
 
     // Hàm thêm một dòng giấy tờ mới (rỗng)
     const handleAddRow = () => {
@@ -50,6 +87,9 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
             const response = await hoSoService.uploadFile(file);
             const { url, fileName } = response.data;
 
+            // <<< THÊM DÒNG NÀY ĐỂ DEBUG >>>
+            console.log("URL trả về từ backend:", url); 
+
             const updatedGiayToDinhKem = formData.giayToDinhKem.map((item, i) => {
                 if (i === index) {
                     return { ...item, duongDanTapTin: url, fileName: fileName };
@@ -61,13 +101,14 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
             console.error("File upload error:", err);
             setUploadingState(prev => ({ ...prev, [index]: { uploading: false, error: 'Tải lên thất bại' } }));
         } finally {
+            // Đảm bảo trạng thái loading luôn được tắt
             setUploadingState(prev => ({ ...prev, [index]: { uploading: false } }));
         }
     };
 
     return (
         <Box>
-            <Typography variant="h6" gutterBottom>3. Đính kèm giấy tờ</Typography>
+            <Typography variant="h6" gutterBottom>4. Đính kèm giấy tờ</Typography>
             
             {showValidation && errors.giayTo && (
                 <Alert severity="error" sx={{ mb: 2 }}>{errors.giayTo}</Alert>
@@ -79,7 +120,7 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Tên giấy tờ *</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Tập tin đính kèm *</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>#</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -114,7 +155,14 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
                                         {giayTo.duongDanTapTin ? (
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'success.main' }}>
                                                 <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} />
-                                                <MuiLink href={giayTo.duongDanTapTin} target="_blank" rel="noopener noreferrer" variant="body2">{giayTo.fileName}</MuiLink>
+                                                <Button 
+                                                    size="small" 
+                                                    variant="text" 
+                                                    onClick={() => handleOpenFileViewer(giayTo)}
+                                                    sx={{ textTransform: 'none', p: 0.2, fontWeight: 500 }}
+                                                >
+                                                    {giayTo.fileName || 'file_da_upload.pdf'}
+                                                </Button>
                                             </Box>
                                         ) : (
                                             <Button
@@ -132,10 +180,13 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
                                         {uploadingState[index]?.error && <Typography color="error" variant="caption">{uploadingState[index].error}</Typography>}
                                     </TableCell>
                                     <TableCell align="right">
-                                        <IconButton onClick={() => handleRemoveRow(index)} color="error" size="small">
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </TableCell>
+                                            <IconButton onClick={() => handleOpenFileViewer(giayTo)} color="primary" size="small" disabled={!giayTo.duongDanTapTin}>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleRemoveRow(index)} color="error" size="small">
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -150,6 +201,40 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <Modal open={!!viewingFile} onClose={handleCloseFileViewer} closeAfterTransition>
+                <Fade in={!!viewingFile}>
+                    <Box sx={viewerModalStyle}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexShrink: 0 }}>
+                            <Typography variant="h6" noWrap>{viewingFile?.fileName}</Typography>
+                            <IconButton onClick={handleCloseFileViewer}><CloseIcon /></IconButton>
+                        </Box>
+
+                        {viewingFile && isViewableInBrowser(viewingFile.fileName) ? (
+                            // Dùng iframe để hiển thị PDF, ảnh...
+                            <iframe 
+                                src={viewingFile.duongDanTapTin}
+                                title={viewingFile.fileName}
+                                style={{ width: '100%', height: '100%', border: '1px solid #ccc', borderRadius: '4px' }}
+                            />
+                        ) : (
+                            // Fallback cho các file không xem được (Word, Excel...)
+                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', bgcolor: 'grey.100', borderRadius: '4px' }}>
+                                <Typography sx={{ mb: 2 }}>Trình duyệt không thể hiển thị trực tiếp file này.</Typography>
+                                <Button
+                                    variant="contained"
+                                    component="a" // Dùng như thẻ <a>
+                                    href={viewingFile?.duongDanTapTin}
+                                    download // Thuộc tính này sẽ trigger việc tải file
+                                >
+                                    Tải về: {viewingFile?.fileName}
+                                </Button>
+                            </Box>
+                        )}
+                    </Box>
+                </Fade>
+            </Modal>
+
         </Box>
     );
 };

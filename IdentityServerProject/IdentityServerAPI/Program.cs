@@ -14,6 +14,7 @@ using IdentityServerAPI.Services;
 using IdentityServerAPI.Services.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +78,8 @@ builder.Services.AddScoped<IAuthService, AuthService>(); // AuthService là nơi
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHomepageService, HomepageService>();
 builder.Services.AddScoped<IHoSoService, HoSoService>();
+
+builder.Services.AddHttpContextAccessor(); 
 
 // --- 6. Cấu hình JWT Authentication và thêm GOOGLE Authentication ---
 builder.Services.AddAuthentication(options =>
@@ -171,9 +174,20 @@ builder.Services.AddCors(options =>
                 }
             }
             
-            policyBuilder.WithOrigins(origins.ToArray()) // Dùng danh sách origins đã tạo
-                         .AllowAnyHeader()
-                         .AllowAnyMethod();
+            // Thêm AllowAnyOrigin() nếu đang ở môi trường Development cho chắc chắn
+            if (builder.Environment.IsDevelopment())
+            {
+                policyBuilder.AllowAnyOrigin()
+                             .AllowAnyHeader()
+                             .AllowAnyMethod();
+            }
+            else
+            {
+                // Giữ lại cấu hình cũ cho môi trường Production
+                policyBuilder.WithOrigins(origins.ToArray())
+                             .AllowAnyHeader()
+                             .AllowAnyMethod();
+            }
         });
 });
 
@@ -232,7 +246,19 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    // Chỉ định rõ thư mục gốc là wwwroot
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "wwwroot")),
+    // Cho phép truy cập mà không cần xác thực
+    OnPrepareResponse = ctx =>
+    {
+        // Dòng này rất quan trọng, nó nói rằng các file tĩnh không cần
+        // các header bảo mật như CORS, vì chúng là tài nguyên công khai.
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+    }
+});
 app.UseRouting();
 app.UseCors("AllowFrontendOrigin");
 app.UseAuthentication();

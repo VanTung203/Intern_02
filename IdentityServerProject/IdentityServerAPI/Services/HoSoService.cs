@@ -20,8 +20,9 @@ namespace IdentityServerAPI.Services
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<HoSoService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public HoSoService(IMongoDatabase database, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager, ILogger<HoSoService> logger)
+        public HoSoService(IMongoDatabase database, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager, ILogger<HoSoService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _hoSoCollection = database.GetCollection<HoSo>("HoSo");
             _nguoiNopDonCollection = database.GetCollection<NguoiNopDon>("NguoiNopDon");
@@ -30,6 +31,7 @@ namespace IdentityServerAPI.Services
             _webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<IActionResult> GetThuTucHanhChinhAsync()
@@ -59,11 +61,7 @@ namespace IdentityServerAPI.Services
         {
             if (file == null || file.Length == 0)
                 return new BadRequestObjectResult(new { message = "Không có file nào được chọn." });
-
-            // Cân nhắc thêm giới hạn kích thước file ở đây
-            // if (file.Length > 5 * 1024 * 1024) // Ví dụ: 5MB
-            //    return new BadRequestObjectResult(new { message = "Kích thước file vượt quá 5MB." });
-
+            
             try
             {
                 var uploadsFolderPath = Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot", "giay-to");
@@ -72,7 +70,6 @@ namespace IdentityServerAPI.Services
                     Directory.CreateDirectory(uploadsFolderPath);
                 }
 
-                // Tạo tên file duy nhất để tránh trùng lặp
                 var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                 var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
 
@@ -80,11 +77,15 @@ namespace IdentityServerAPI.Services
                 {
                     await file.CopyToAsync(stream);
                 }
+                
+                // BẮT ĐẦU PHẦN TẠO URL TUYỆT ĐỐI
+                var request = _httpContextAccessor.HttpContext.Request;
+                var baseUrl = $"{request.Scheme}://{request.Host}";
+                var fileUrl = $"{baseUrl}/giay-to/{uniqueFileName}";
+                // KẾT THÚC PHẦN TẠO URL TUYỆT ĐỐI
 
-                // Trả về đường dẫn tương đối để frontend có thể truy cập
-                var fileUrl = $"/giay-to/{uniqueFileName}";
                 _logger.LogInformation("File uploaded successfully to {Path}", fileUrl);
-                return new OkObjectResult(new { url = fileUrl, fileName = file.FileName });
+                return new OkObjectResult(new { url = fileUrl, fileName = file.FileName }); // <<< Trả về URL đầy đủ
             }
             catch (Exception ex)
             {
