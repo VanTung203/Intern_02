@@ -11,12 +11,11 @@ namespace IdentityServerAPI.DTOs.HoSo
         public int? NamSinh { get; set; }
         [Required]
         public string SoCCCD { get; set; } = string.Empty;
-        [Required]
-        public string DiaChi { get; set; } = string.Empty;
+        public string? DiaChi { get; set; }
         [Required]
         public string SoDienThoai { get; set; } = string.Empty;
-        [Required]
+        // [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
     }
 }

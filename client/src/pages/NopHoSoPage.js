@@ -14,8 +14,6 @@ import Step3_DinhKemGiayTo from '../components/hoso/Step3_DinhKemGiayTo';
 import Step5_HoanThanh from '../components/hoso/Step5_HoanThanh';
 import hoSoService from '../services/hoSoService';
 
-// --- BẮT ĐẦU PHẦN CODE MỚI ---
-
 // Style cho Modal (hộp thoại chỉnh sửa)
 const modalStyle = {
     position: 'absolute',
@@ -164,15 +162,15 @@ const NopHoSoPage = () => {
                 ngaySinh: formData.nguoiNopDon.ngaySinh || null,
                 namSinh: formData.nguoiNopDon.namSinh ? parseInt(formData.nguoiNopDon.namSinh, 10) : null,
                 soCCCD: formData.nguoiNopDon.soCCCD,
-                diaChi: formData.nguoiNopDon.diaChi,
                 soDienThoai: formData.nguoiNopDon.soDienThoai,
-                email: formData.nguoiNopDon.email,
+                diaChi: formData.nguoiNopDon.diaChi || null,
+                email: formData.nguoiNopDon.email || null, 
             },
             // Object ThongTinThuaDat lồng nhau
             thongTinThuaDat: {
                 soThuTuThua: formData.thongTinThuaDat.soThuTuThua,
                 soHieuToBanDo: formData.thongTinThuaDat.soHieuToBanDo,
-                diaChi: formData.thongTinThuaDat.diaChi,
+                diaChi: formData.thongTinThuaDat.diaChi || null,
             },
             giayToDinhKem: formData.giayToDinhKem.map(gt => ({
                 tenLoaiGiayTo: gt.tenLoaiGiayTo,
