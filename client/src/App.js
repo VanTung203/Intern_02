@@ -20,13 +20,15 @@ import ResetPasswordSuccessPage from './pages/ResetPasswordSuccessPage';
 import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import GoogleSigninSuccessPage from './pages/GoogleSigninSuccessPage';
 import HomePage from './pages/homepage/HomePage';
-import NopHoSoPage from './pages/NopHoSoPage';
 import TraCuuHoSoPage from './pages/TraCuuHoSoPage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
 import UserProfileInfoForm from './components/User/UserProfileInfoForm';
 import UserSecurityContent from './components/User/UserSecurityContent';
+import NopHoSoPage from './pages/NopHoSoPage';
+import HoSoDaNopPage from './pages/HoSoDaNopPage';
+import ChinhSuaHoSoPage from './pages/ChinhSuaHoSoPage';
 
 // Admin Pages
 import UserListPage from './pages/admin/UserListPage';
@@ -56,6 +58,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route element={<PrivateRoute />}> 
             <Route path="/nop-ho-so" element={<NopHoSoPage />} />
+            <Route path="/ho-so-da-nop" element={<HoSoDaNopPage />} />
+            <Route path="/chinh-sua-ho-so/:soBienNhan" element={<ChinhSuaHoSoPage />} />
           </Route>
           <Route path="/tra-cuu-ho-so" element={<TraCuuHoSoPage />} />
         </Route>

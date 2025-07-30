@@ -14,6 +14,7 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Logout from '@mui/icons-material/Logout';
+import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 
 const UserMenu = () => {
   const { user, logoutAction } = useAuth();
@@ -81,6 +82,10 @@ const UserMenu = () => {
                 Thông tin tài khoản
             </MenuItem>
         )}
+        <MenuItem component={RouterLink} to="/ho-so-da-nop" onClick={handleClose}>
+                <ListItemIcon><FolderCopyIcon fontSize="small" /></ListItemIcon>
+                Hồ sơ đã nộp
+            </MenuItem>
         
         <MenuItem onClick={handleLogout}>
           <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
