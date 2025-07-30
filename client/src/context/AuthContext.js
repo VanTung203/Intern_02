@@ -69,6 +69,7 @@ export const AuthProvider = ({ children }) => {
             firstName: decodedToken.given_name || '',
             lastName: decodedToken.family_name || '',
             roles: decodedToken.role || [], // Đảm bảo roles là một mảng
+            soCCCD: decodedToken.cccd || '', // Lấy từ claim "cccd"
         };
 
         // 3. Cập nhật state
@@ -96,7 +97,8 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         loginAction,
         logoutAction,
-        loginActionFromToken
+        loginActionFromToken,
+        setUser // Thêm setUser để các component khác có thể cập nhật thông tin user
     };
 
     return (

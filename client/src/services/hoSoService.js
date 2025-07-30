@@ -22,14 +22,23 @@ const submitHoSo = (data) => {
   return apiClient.post('/hoso/submit', data);
 };
 
-const getHoSoDetails = (receiptNumber, cccd) => {
+const getHoSoDetails = (receiptNumber, cccd = null) => {
   // Sử dụng 'params' để axios tự động tạo query string ?receiptNumber=...&cccd=...
   return apiClient.get('/hoso/details', {
     params: {
       receiptNumber,
-      cccd,
+      cccd, // axios sẽ tự bỏ qua nếu cccd là null
     },
   });
+};
+
+// Hai hàm cho việc cập nhật hồ sơ
+const getMySubmissions = () => {
+  return apiClient.get('/hoso/my-submissions');
+};
+
+const updateHoSo = (soBienNhan, data) => {
+  return apiClient.put(`/hoso/update/${soBienNhan}`, data);
 };
 
 const hoSoService = {
@@ -37,6 +46,8 @@ const hoSoService = {
   uploadFile,
   submitHoSo,
   getHoSoDetails,
+  getMySubmissions,
+  updateHoSo,
 };
 
 

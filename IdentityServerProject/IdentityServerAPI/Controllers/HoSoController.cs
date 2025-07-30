@@ -23,6 +23,25 @@ namespace IdentityServerAPI.Controllers
             _hoSoService = hoSoService;
         }
 
+        // Endpoints cập nhật hồ sơ
+        [Authorize]
+        [HttpGet("my-submissions")] // GET /api/hoso/my-submissions
+        public async Task<IActionResult> GetMySubmissions()
+        {
+            return await _hoSoService.GetMySubmissionsAsync(User);
+        }
+
+        [Authorize]
+        [HttpPut("update/{soBienNhan}")] // PUT /api/hoso/update/HS0001
+        public async Task<IActionResult> Update(string soBienNhan, [FromBody] UpdateHoSoDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return await _hoSoService.UpdateHoSoAsync(soBienNhan, dto, User);
+        }
+
         // Endpoint tra cứu nhanh thông tin hồ sơ
         [AllowAnonymous]
         [HttpGet("lookup")] // GET /api/hoso/lookup?receiptNumber=xxxx
@@ -65,29 +84,27 @@ namespace IdentityServerAPI.Controllers
         
         // Thêm endpoint tra cứu thông tin hồ sơ
         [AllowAnonymous]
-        [HttpGet("details")] // GET /api/hoso/details?receiptNumber=xxxx&cccd=yyyy
-        public async Task<IActionResult> GetDetails([FromQuery] string receiptNumber, [FromQuery] string cccd)
+        [HttpGet("details")]
+        public async Task<IActionResult> GetDetails([FromQuery] string receiptNumber, [FromQuery] string? cccd)
         {
-            if (string.IsNullOrWhiteSpace(receiptNumber) || string.IsNullOrWhiteSpace(cccd))
+            if (string.IsNullOrWhiteSpace(receiptNumber))
             {
-                return BadRequest(new { message = "Vui lòng nhập đầy đủ Số biên nhận và Số CCCD." });
+                return BadRequest(new { message = "Vui lòng nhập Số biên nhận." });
             }
 
-            try
+            // Nếu người dùng chưa đăng nhập VÀ không cung cấp CCCD -> lỗi
+            if (!User.Identity.IsAuthenticated && string.IsNullOrEmpty(cccd))
             {
-                var result = await _hoSoService.GetHoSoDetailsAsync(receiptNumber, cccd);
-                if (result == null)
-                {
-                    // Trả về thông báo chung để bảo mật, không tiết lộ thông tin nào đúng/sai
-                    return NotFound(new { message = "Không tìm thấy hồ sơ. Vui lòng kiểm tra lại Số biên nhận và Số CCCD." });
-                }
-                return Ok(result);
+                return BadRequest(new { message = "Vui lòng cung cấp Số CCCD để tra cứu." });
             }
-            catch (Exception ex)
+
+            var result = await _hoSoService.GetHoSoDetailsAsync(receiptNumber, cccd, User);
+
+            if (result == null)
             {
-                _logger.LogError(ex, "Lỗi khi tra cứu chi tiết hồ sơ {ReceiptNumber}", receiptNumber);
-                return StatusCode(500, new { message = "Đã có lỗi xảy ra trên máy chủ." });
+                return NotFound(new { message = "Không tìm thấy hồ sơ hoặc bạn không có quyền truy cập." });
             }
+            return Ok(result);
         }
     }
 }
