@@ -1,4 +1,5 @@
 // IdentityServerProject/IdentityServerAPI/Services/HoSoService.cs
+using IdentityServerAPI.Configuration;
 using IdentityServerAPI.DTOs.HoSo;
 using IdentityServerAPI.Enums;
 using IdentityServerAPI.Models;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace IdentityServerAPI.Services
 {
@@ -21,8 +23,16 @@ namespace IdentityServerAPI.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<HoSoService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly FileUploadSettings _fileUploadSettings;
 
-        public HoSoService(IMongoDatabase database, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager, ILogger<HoSoService> logger, IHttpContextAccessor httpContextAccessor)
+        public HoSoService(
+            IMongoDatabase database,
+            IWebHostEnvironment webHostEnvironment,
+            UserManager<ApplicationUser> userManager,
+            ILogger<HoSoService> logger,
+            IHttpContextAccessor httpContextAccessor,
+            IOptions<FileUploadSettings> fileUploadSettings
+        )
         {
             _hoSoCollection = database.GetCollection<HoSo>("HoSo");
             _nguoiNopDonCollection = database.GetCollection<NguoiNopDon>("NguoiNopDon");
@@ -32,6 +42,7 @@ namespace IdentityServerAPI.Services
             _userManager = userManager;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _fileUploadSettings = fileUploadSettings.Value;
         }
 
         public async Task<IActionResult> GetThuTucHanhChinhAsync()
@@ -62,6 +73,22 @@ namespace IdentityServerAPI.Services
             if (file == null || file.Length == 0)
                 return new BadRequestObjectResult(new { message = "Không có file nào được chọn." });
             
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (string.IsNullOrEmpty(fileExtension) || !_fileUploadSettings.AllowedExtensions.Contains(fileExtension))
+            {
+                var allowedTypes = string.Join(", ", _fileUploadSettings.AllowedExtensions);
+                _logger.LogWarning("File upload rejected: Invalid extension '{Extension}'. Allowed: {Allowed}", fileExtension, allowedTypes);
+                return new BadRequestObjectResult(new { message = $"Loại file không hợp lệ. Chỉ chấp nhận các định dạng: {allowedTypes}" });
+            }
+
+            if (file.Length > _fileUploadSettings.MaxSizeInBytes)
+            {
+                var maxSizeInMB = _fileUploadSettings.MaxSizeInBytes / 1024 / 1024;
+                _logger.LogWarning("File upload rejected: File size {Size} exceeds limit of {Limit}MB.", file.Length, maxSizeInMB);
+                return new BadRequestObjectResult(new { message = $"Kích thước file quá lớn. Tối đa cho phép là {maxSizeInMB}MB." });
+            }
+
             try
             {
                 var uploadsFolderPath = Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot", "giay-to");
@@ -70,14 +97,14 @@ namespace IdentityServerAPI.Services
                     Directory.CreateDirectory(uploadsFolderPath);
                 }
 
-                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}"; // Tái sử dụng biến đã có
                 var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
-                
+
                 // BẮT ĐẦU PHẦN TẠO URL TUYỆT ĐỐI
                 var request = _httpContextAccessor.HttpContext.Request;
                 var baseUrl = $"{request.Scheme}://{request.Host}";
