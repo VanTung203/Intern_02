@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
     Box, Typography, Button, IconButton, Paper, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, TextField, CircularProgress, Alert,
-    Modal, Fade
+    Modal, Fade, Snackbar
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -32,6 +32,12 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
     const [uploadingState, setUploadingState] = useState({});
 
     const [viewingFile, setViewingFile] = useState(null); // State để lưu thông tin file đang xem
+
+    const [fileError, setFileError] = useState(''); // State cho lỗi validation ở client
+    // Các quy tắc này nên đồng bộ với appsettings.json ở backend
+    const allowedFileTypes = ".pdf, .doc, .docx, .jpg, .jpeg, .png";
+    const allowedExtensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
 
     const handleOpenFileViewer = (file) => {
         setViewingFile(file);
@@ -82,6 +88,23 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
         const file = event.target.files[0];
         if (!file) return;
 
+        // Dọn dẹp input để người dùng có thể chọn lại cùng file nếu bị lỗi
+        const inputElement = event.target;
+
+        // VALIDATION PHÍA CLIENT
+        const fileExtension = `.${file.name.split('.').pop().toLowerCase()}`;
+        if (!allowedExtensions.includes(fileExtension)) {
+            setFileError(`Loại file không hợp lệ. Chỉ chấp nhận: ${allowedFileTypes}`);
+            inputElement.value = ""; // Reset input
+            return;
+        }
+
+        if (file.size > maxFileSize) {
+            setFileError(`Kích thước file quá lớn. Tối đa cho phép là ${maxFileSize / 1024 / 1024}MB.`);
+            inputElement.value = ""; // Reset input
+            return;
+        }
+
         setUploadingState(prev => ({ ...prev, [index]: { uploading: true, error: null } }));
         try {
             const response = await hoSoService.uploadFile(file);
@@ -98,11 +121,13 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
             });
             onDataChange({ giayToDinhKem: updatedGiayToDinhKem });
         } catch (err) {
-            console.error("File upload error:", err);
-            setUploadingState(prev => ({ ...prev, [index]: { uploading: false, error: 'Tải lên thất bại' } }));
+            console.error("File upload error:", err.response?.data || err);
+            // Hiển thị lỗi từ server nếu có (ví dụ: backend thay đổi quy tắc)
+            const serverErrorMessage = err.response?.data?.message || 'Tải lên thất bại';
+            setUploadingState(prev => ({ ...prev, [index]: { uploading: false, error: serverErrorMessage } }));
         } finally {
-            // Đảm bảo trạng thái loading luôn được tắt
             setUploadingState(prev => ({ ...prev, [index]: { uploading: false } }));
+            inputElement.value = ""; // Reset input sau khi upload xong
         }
     };
 
@@ -174,7 +199,7 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
                                                 color={hasFileError ? 'error' : 'primary'}
                                             >
                                                 Tải lên
-                                                <input type="file" hidden onChange={(e) => handleFileUpload(e, index)} />
+                                                <input type="file" hidden onChange={(e) => handleFileUpload(e, index)} accept={allowedFileTypes} />
                                             </Button>
                                         )}
                                         {uploadingState[index]?.error && <Typography color="error" variant="caption">{uploadingState[index].error}</Typography>}
@@ -235,6 +260,17 @@ const Step3_DinhKemGiayTo = ({ formData, onDataChange, errors, showValidation })
                 </Fade>
             </Modal>
 
+            {/* <<< THÊM COMPONENT Snackbar ĐỂ HIỂN THỊ LỖI >>> */}
+            <Snackbar
+                open={!!fileError}
+                autoHideDuration={6000}
+                onClose={() => setFileError('')}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setFileError('')} severity="error" sx={{ width: '100%' }}>
+                    {fileError}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
