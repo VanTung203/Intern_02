@@ -41,6 +41,14 @@ const updateHoSo = (soBienNhan, data) => {
   return apiClient.put(`/hoso/update/${soBienNhan}`, data);
 };
 
+// Hàm cho tra cứu nhanh
+const lookupHoSo = (data) => {
+  // data sẽ là { receiptNumber: "...", recaptchaToken: "..." }
+  return apiClient.post('/hoso/lookup', data);
+};
+
+
+// Export
 const hoSoService = {
   getThuTucHanhChinh,
   uploadFile,
@@ -48,8 +56,8 @@ const hoSoService = {
   getHoSoDetails,
   getMySubmissions,
   updateHoSo,
+  lookupHoSo,
 };
-
 
 
 export default hoSoService;
