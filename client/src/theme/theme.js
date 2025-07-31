@@ -83,7 +83,7 @@ const theme = createTheme({
         root: ({ theme }) => ({ // Thêm theme để truy cập palette
           '& .MuiOutlinedInput-root': {
             borderRadius: theme.shape.borderRadius,
-            backgroundColor: GREY[100], // Nền xám rất nhạt cho input
+            // backgroundColor: GREY[100], // Nền xám rất nhạt cho input
             '& fieldset': {
               // borderColor: 'transparent', // Bỏ viền
             },

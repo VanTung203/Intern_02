@@ -80,6 +80,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHomepageService, HomepageService>();
 builder.Services.AddScoped<IHoSoService, HoSoService>();
 
+builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
+builder.Services.AddScoped<IReCaptchaService, ReCaptchaService>();
+
 builder.Services.AddHttpContextAccessor(); 
 
 // --- 6. Cấu hình JWT Authentication và thêm GOOGLE Authentication ---

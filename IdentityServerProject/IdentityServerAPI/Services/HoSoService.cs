@@ -15,6 +15,7 @@ namespace IdentityServerAPI.Services
 {
     public class HoSoService : IHoSoService
     {
+        // Biến
         private readonly IMongoCollection<HoSo> _hoSoCollection;
         private readonly IMongoCollection<NguoiNopDon> _nguoiNopDonCollection;
         private readonly IMongoCollection<ThongTinThuaDat> _thongTinThuaDatCollection;
@@ -24,16 +25,20 @@ namespace IdentityServerAPI.Services
         private readonly ILogger<HoSoService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly FileUploadSettings _fileUploadSettings;
+        private readonly IReCaptchaService _reCaptchaService;
 
+        // Tham số
         public HoSoService(
             IMongoDatabase database,
             IWebHostEnvironment webHostEnvironment,
             UserManager<ApplicationUser> userManager,
             ILogger<HoSoService> logger,
             IHttpContextAccessor httpContextAccessor,
-            IOptions<FileUploadSettings> fileUploadSettings
+            IOptions<FileUploadSettings> fileUploadSettings,
+            IReCaptchaService reCaptchaService
         )
         {
+            // Giá trị
             _hoSoCollection = database.GetCollection<HoSo>("HoSo");
             _nguoiNopDonCollection = database.GetCollection<NguoiNopDon>("NguoiNopDon");
             _thongTinThuaDatCollection = database.GetCollection<ThongTinThuaDat>("ThongTinThuaDat");
@@ -43,6 +48,7 @@ namespace IdentityServerAPI.Services
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _fileUploadSettings = fileUploadSettings.Value;
+            _reCaptchaService = reCaptchaService;
         }
 
         public async Task<IActionResult> GetThuTucHanhChinhAsync()
@@ -311,27 +317,34 @@ namespace IdentityServerAPI.Services
 }
 
         // Phương thức xử lý tra cứu nhanh thông tin hồ sơ
-        public async Task<HoSoLookupResultDto?> LookupHoSoByReceiptNumberAsync(string receiptNumber)
+        public async Task<IActionResult> LookupHoSoByReceiptNumberAsync(HoSoLookupRequestDto dto)
         {
+            // 1. Xác thực CAPTCHA trước
+            var isCaptchaValid = await _reCaptchaService.IsCaptchaValidAsync(dto.RecaptchaToken);
+            if (!isCaptchaValid)
+            {
+                return new BadRequestObjectResult(new { message = "Xác thực CAPTCHA không thành công." });
+            }
+
+            // 2. Nếu CAPTCHA hợp lệ, tiếp tục tra cứu như cũ
             var hoSo = await _hoSoCollection
-                .Find(h => h.SoBienNhan.ToLower() == receiptNumber.Trim().ToLower())
+                .Find(h => h.SoBienNhan.ToLower() == dto.ReceiptNumber.Trim().ToLower())
                 .FirstOrDefaultAsync();
 
             if (hoSo == null)
             {
-                return null;
+                return new NotFoundObjectResult(new { message = "Không tìm thấy hồ sơ với số biên nhận này." });
             }
 
-            // Tái sử dụng hàm helper để lấy tên trạng thái chính xác
             var tenTrangThai = GetTenTrangThaiHoSo(hoSo.TrangThaiHoSo);
-
-            // Ánh xạ kết quả sang DTO mới
-            return new HoSoLookupResultDto
+            var resultDto = new HoSoLookupResultDto
             {
                 SoBienNhan = hoSo.SoBienNhan,
                 TenTrangThaiHoSo = tenTrangThai,
                 NgayNopHoSo = hoSo.NgayNopHoSo
             };
+
+            return new OkObjectResult(resultDto);
         }
 
         // Các phương thức cho việc bổ sung, chỉnh sửa hồ sơ

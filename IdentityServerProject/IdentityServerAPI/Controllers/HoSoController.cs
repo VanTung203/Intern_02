@@ -44,29 +44,22 @@ namespace IdentityServerAPI.Controllers
 
         // Endpoint tra cứu nhanh thông tin hồ sơ
         [AllowAnonymous]
-        [HttpGet("lookup")] // GET /api/hoso/lookup?receiptNumber=xxxx
-        public async Task<IActionResult> LookupByReceiptNumber([FromQuery] string receiptNumber)
+        [HttpPost("lookup")] // <<< THAY ĐỔI TỪ GET SANG POST
+        public async Task<IActionResult> LookupByReceiptNumber([FromBody] HoSoLookupRequestDto dto)
         {
-            if (string.IsNullOrWhiteSpace(receiptNumber))
+            if (!ModelState.IsValid)
             {
-                return BadRequest(new { message = "Vui lòng nhập số biên nhận." });
+                return BadRequest(ModelState);
             }
 
             try
             {
-                var result = await _hoSoService.LookupHoSoByReceiptNumberAsync(receiptNumber);
-
-                if (result == null)
-                {
-                    return NotFound(new { message = "Không tìm thấy hồ sơ với số biên nhận này." });
-                }
-
-                // Trả về DTO đã được xử lý, chứa trạng thái dạng chữ
-                return Ok(result); 
+                // Chuyển toàn bộ logic vào service, controller chỉ gọi
+                return await _hoSoService.LookupHoSoByReceiptNumberAsync(dto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during ho so lookup for receipt number {ReceiptNumber}", receiptNumber);
+                _logger.LogError(ex, "Error during ho so lookup for receipt number {ReceiptNumber}", dto.ReceiptNumber);
                 return StatusCode(500, new { message = "Đã có lỗi xảy ra trong quá trình tra cứu." });
             }
         }
