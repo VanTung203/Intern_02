@@ -15,6 +15,7 @@ using IdentityServerAPI.Services.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.FileProviders;
+using Ganss.Xss;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -156,6 +157,20 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
+});
+
+// Cấu hình Dependency Injection cho HtmlSanitizer
+builder.Services.AddSingleton<IHtmlSanitizer>(s =>
+{
+    // Khởi tạo sanitizer như bình thường
+    var sanitizer = new HtmlSanitizer();
+
+    // XÓA TẤT CẢ CÁC THẺ HTML ĐƯỢC PHÉP.
+    // Bằng cách này, sanitizer sẽ loại bỏ mọi thẻ và chỉ giữ lại nội dung văn bản bên trong.
+    sanitizer.AllowedTags.Clear();
+
+    // Trả về sanitizer đã được cấu hình
+    return sanitizer;
 });
 
 // Cấu hình CORS

@@ -97,6 +97,9 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             fullWidth
                             value={nguoiNopDon.email || ''}
                             onChange={handleChange}
+                            // <<< THÊM XỬ LÝ LỖI CHO EMAIL
+                            error={showValidation && !!errors.email}
+                            helperText={showValidation && errors.email}
                         />
                     </Grid>
                     <Grid item xs={12}>
