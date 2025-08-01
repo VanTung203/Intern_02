@@ -1,9 +1,7 @@
 using IdentityServerAPI.DTOs.HoSo;
-using IdentityServerAPI.Models;
 using IdentityServerAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 
 namespace IdentityServerAPI.Controllers
 {
@@ -35,10 +33,11 @@ namespace IdentityServerAPI.Controllers
         [HttpPut("update/{soBienNhan}")] // PUT /api/hoso/update/HS0001
         public async Task<IActionResult> Update(string soBienNhan, [FromBody] UpdateHoSoDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            // Khối if (!ModelState.IsValid) đã được xóa, [ApiController] sẽ tự xử lý
+            // if (!ModelState.IsValid)
+            // {
+            //     return BadRequest(ModelState);
+            // }
             return await _hoSoService.UpdateHoSoAsync(soBienNhan, dto, User);
         }
 
@@ -47,10 +46,11 @@ namespace IdentityServerAPI.Controllers
         [HttpPost("lookup")] // <<< THAY ĐỔI TỪ GET SANG POST
         public async Task<IActionResult> LookupByReceiptNumber([FromBody] HoSoLookupRequestDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            // Khối if (!ModelState.IsValid) đã được xóa, [ApiController] sẽ tự xử lý
+            // if (!ModelState.IsValid)
+            // {
+            //     return BadRequest(ModelState);
+            // }
 
             try
             {
@@ -68,10 +68,11 @@ namespace IdentityServerAPI.Controllers
         [HttpPost("submit")] // POST /api/hoso/submit
         public async Task<IActionResult> Submit([FromBody] SubmitHoSoDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            // Khối if (!ModelState.IsValid) đã được xóa, [ApiController] sẽ tự xử lý
+            // if (!ModelState.IsValid)
+            // {
+            //     return BadRequest(ModelState);
+            // }
             return await _hoSoService.SubmitHoSoAsync(dto, User);
         }
         

@@ -1,4 +1,7 @@
 // IdentityServerProject/IdentityServerAPI/Services/HoSoService.cs
+using Ganss.Xss;
+using AngleSharp.Html.Parser;
+using System.Text.RegularExpressions;
 using IdentityServerAPI.Configuration;
 using IdentityServerAPI.DTOs.HoSo;
 using IdentityServerAPI.Enums;
@@ -26,6 +29,7 @@ namespace IdentityServerAPI.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly FileUploadSettings _fileUploadSettings;
         private readonly IReCaptchaService _reCaptchaService;
+        private readonly IHtmlSanitizer _sanitizer;
 
         // Tham số
         public HoSoService(
@@ -35,7 +39,8 @@ namespace IdentityServerAPI.Services
             ILogger<HoSoService> logger,
             IHttpContextAccessor httpContextAccessor,
             IOptions<FileUploadSettings> fileUploadSettings,
-            IReCaptchaService reCaptchaService
+            IReCaptchaService reCaptchaService,
+            IHtmlSanitizer sanitizer
         )
         {
             // Giá trị
@@ -49,6 +54,7 @@ namespace IdentityServerAPI.Services
             _httpContextAccessor = httpContextAccessor;
             _fileUploadSettings = fileUploadSettings.Value;
             _reCaptchaService = reCaptchaService;
+            _sanitizer = sanitizer;
         }
 
         public async Task<IActionResult> GetThuTucHanhChinhAsync()
@@ -78,7 +84,7 @@ namespace IdentityServerAPI.Services
         {
             if (file == null || file.Length == 0)
                 return new BadRequestObjectResult(new { message = "Không có file nào được chọn." });
-            
+
             var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
             if (string.IsNullOrEmpty(fileExtension) || !_fileUploadSettings.AllowedExtensions.Contains(fileExtension))
@@ -141,6 +147,19 @@ namespace IdentityServerAPI.Services
 
             try
             {
+                // PHẦN SANITIZATION
+                dto.NguoiNopDon.HoTen = SanitizeToPlainText(dto.NguoiNopDon.HoTen);
+                dto.NguoiNopDon.DiaChi = !string.IsNullOrEmpty(dto.NguoiNopDon.DiaChi) ? SanitizeToPlainText(dto.NguoiNopDon.DiaChi) : null;
+                dto.ThongTinThuaDat.DiaChi = !string.IsNullOrEmpty(dto.ThongTinThuaDat.DiaChi) ? SanitizeToPlainText(dto.ThongTinThuaDat.DiaChi) : null;
+
+                if (dto.GiayToDinhKem != null)
+                {
+                    foreach (var giayTo in dto.GiayToDinhKem)
+                    {
+                        giayTo.TenLoaiGiayTo = SanitizeToPlainText(giayTo.TenLoaiGiayTo);
+                    }
+                }
+
                 // 1. Tạo bản ghi HoSo chính
                 var soBienNhan = $"HS-{Guid.NewGuid().ToString("N").ToUpper().Substring(0, 16)}";
 
@@ -211,110 +230,110 @@ namespace IdentityServerAPI.Services
 
         // Phương thức tra cứu thông tin hồ sơ
         public async Task<HoSoDetailsDto?> GetHoSoDetailsAsync(string receiptNumber, string? cccd, ClaimsPrincipal? userPrincipal = null)
-{
-    try
-    {
-        var hoSo = await _hoSoCollection.Find(h => h.SoBienNhan.ToLower() == receiptNumber.Trim().ToLower()).FirstOrDefaultAsync();
-        if (hoSo == null)
         {
-            _logger.LogInformation("Tra cứu không thành công: Không tìm thấy hồ sơ với số biên nhận {ReceiptNumber}", receiptNumber);
-            return null;
-        }
-
-        var currentUser = userPrincipal != null ? await _userManager.GetUserAsync(userPrincipal) : null;
-        
-        // --- LOGIC KIỂM TRA QUYỀN TRUY CẬP ---
-        if (currentUser != null)
-        {
-            if (hoSo.UserId != currentUser.Id)
+            try
             {
-                 _logger.LogWarning("Access denied: User {UserId} attempted to access Ho So {ReceiptNumber} owned by {OwnerId}", currentUser.Id, receiptNumber, hoSo.UserId);
-                 return null;
+                var hoSo = await _hoSoCollection.Find(h => h.SoBienNhan.ToLower() == receiptNumber.Trim().ToLower()).FirstOrDefaultAsync();
+                if (hoSo == null)
+                {
+                    _logger.LogInformation("Tra cứu không thành công: Không tìm thấy hồ sơ với số biên nhận {ReceiptNumber}", receiptNumber);
+                    return null;
+                }
+
+                var currentUser = userPrincipal != null ? await _userManager.GetUserAsync(userPrincipal) : null;
+
+                // --- LOGIC KIỂM TRA QUYỀN TRUY CẬP ---
+                if (currentUser != null)
+                {
+                    if (hoSo.UserId != currentUser.Id)
+                    {
+                        _logger.LogWarning("Access denied: User {UserId} attempted to access Ho So {ReceiptNumber} owned by {OwnerId}", currentUser.Id, receiptNumber, hoSo.UserId);
+                        return null;
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(cccd))
+                    {
+                        _logger.LogWarning("Public access failed: CCCD is required for Ho So {ReceiptNumber}", receiptNumber);
+                        return null;
+                    }
+
+                    var nguoiNopDonForAuth = await _nguoiNopDonCollection.Find(n => n.HoSoId == hoSo.Id).FirstOrDefaultAsync();
+                    if (nguoiNopDonForAuth == null || nguoiNopDonForAuth.SoCCCD.Trim() != cccd.Trim())
+                    {
+                        _logger.LogWarning("Public access failed: CCCD mismatch for Ho So {ReceiptNumber}", receiptNumber);
+                        return null;
+                    }
+                }
+
+                // --- BẮT ĐẦU SỬA LỖI NULLREFERENCE ---
+
+                // Truy vấn tất cả dữ liệu liên quan
+                var nguoiNopDon = await _nguoiNopDonCollection.Find(n => n.HoSoId == hoSo.Id).FirstOrDefaultAsync();
+                var thongTinThuaDat = await _thongTinThuaDatCollection.Find(t => t.HoSoId == hoSo.Id).FirstOrDefaultAsync();
+                var giayToDinhKemList = await _giayToDinhKemCollection.Find(g => g.HoSoId == hoSo.Id).ToListAsync();
+
+                // Kiểm tra xem các dữ liệu thiết yếu có tồn tại không
+                if (nguoiNopDon == null)
+                {
+                    _logger.LogError("Dữ liệu không nhất quán: Không tìm thấy NguoiNopDon cho HoSoId {HoSoId}", hoSo.Id);
+                    return null; // Trả về null nếu dữ liệu bị thiếu
+                }
+                if (thongTinThuaDat == null)
+                {
+                    _logger.LogError("Dữ liệu không nhất quán: Không tìm thấy ThongTinThuaDat cho HoSoId {HoSoId}", hoSo.Id);
+                    return null; // Trả về null nếu dữ liệu bị thiếu
+                }
+
+                var tenThuTuc = await GetTenThuTucHanhChinhById(hoSo.MaThuTucHanhChinh);
+                var tenTrangThai = GetTenTrangThaiHoSo(hoSo.TrangThaiHoSo);
+
+                // Tạo DTO một cách an toàn
+                var hoSoDetails = new HoSoDetailsDto
+                {
+                    SoBienNhan = hoSo.SoBienNhan,
+                    NgayNopHoSo = hoSo.NgayNopHoSo,
+                    NgayTiepNhan = hoSo.NgayTiepNhan,
+                    NgayHenTra = hoSo.NgayHenTra,
+                    TrangThaiHoSo = hoSo.TrangThaiHoSo,
+                    TenTrangThaiHoSo = tenTrangThai,
+                    LyDoTuChoi = hoSo.LyDoTuChoi,
+                    TenThuTucHanhChinh = tenThuTuc,
+                    NguoiNopDon = new NguoiNopDonDto
+                    {
+                        HoTen = nguoiNopDon.HoTen,
+                        GioiTinh = nguoiNopDon.GioiTinh,
+                        NgaySinh = nguoiNopDon.NgaySinh,
+                        NamSinh = nguoiNopDon.NamSinh,
+                        SoCCCD = nguoiNopDon.SoCCCD,
+                        DiaChi = nguoiNopDon.DiaChi,
+                        SoDienThoai = nguoiNopDon.SoDienThoai,
+                        Email = nguoiNopDon.Email
+                    },
+                    ThongTinThuaDat = new ThongTinThuaDatDto
+                    {
+                        SoThuTuThua = thongTinThuaDat.SoThuTuThua,
+                        SoHieuToBanDo = thongTinThuaDat.SoHieuToBanDo,
+                        DiaChi = thongTinThuaDat.DiaChi
+                    },
+                    GiayToDinhKem = giayToDinhKemList.Select(g => new GiayToDinhKemDto
+                    {
+                        TenLoaiGiayTo = g.TenLoaiGiayTo,
+                        DuongDanTapTin = g.DuongDanTapTin,
+                        FileName = Path.GetFileName(g.DuongDanTapTin)
+                    }).ToList()
+                };
+
+                return hoSoDetails;
+                // --- KẾT THÚC SỬA LỖI NULLREFERENCE ---
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi nghiêm trọng khi tra cứu chi tiết hồ sơ {ReceiptNumber}", receiptNumber);
+                return null; // Trả về null nếu có lỗi hệ thống
             }
         }
-        else
-        {
-            if(string.IsNullOrEmpty(cccd))
-            {
-                 _logger.LogWarning("Public access failed: CCCD is required for Ho So {ReceiptNumber}", receiptNumber);
-                 return null;
-            }
-
-            var nguoiNopDonForAuth = await _nguoiNopDonCollection.Find(n => n.HoSoId == hoSo.Id).FirstOrDefaultAsync();
-            if (nguoiNopDonForAuth == null || nguoiNopDonForAuth.SoCCCD.Trim() != cccd.Trim())
-            {
-                _logger.LogWarning("Public access failed: CCCD mismatch for Ho So {ReceiptNumber}", receiptNumber);
-                return null;
-            }
-        }
-        
-        // --- BẮT ĐẦU SỬA LỖI NULLREFERENCE ---
-        
-        // Truy vấn tất cả dữ liệu liên quan
-        var nguoiNopDon = await _nguoiNopDonCollection.Find(n => n.HoSoId == hoSo.Id).FirstOrDefaultAsync();
-        var thongTinThuaDat = await _thongTinThuaDatCollection.Find(t => t.HoSoId == hoSo.Id).FirstOrDefaultAsync();
-        var giayToDinhKemList = await _giayToDinhKemCollection.Find(g => g.HoSoId == hoSo.Id).ToListAsync();
-        
-        // Kiểm tra xem các dữ liệu thiết yếu có tồn tại không
-        if (nguoiNopDon == null)
-        {
-            _logger.LogError("Dữ liệu không nhất quán: Không tìm thấy NguoiNopDon cho HoSoId {HoSoId}", hoSo.Id);
-            return null; // Trả về null nếu dữ liệu bị thiếu
-        }
-        if (thongTinThuaDat == null)
-        {
-            _logger.LogError("Dữ liệu không nhất quán: Không tìm thấy ThongTinThuaDat cho HoSoId {HoSoId}", hoSo.Id);
-            return null; // Trả về null nếu dữ liệu bị thiếu
-        }
-
-        var tenThuTuc = await GetTenThuTucHanhChinhById(hoSo.MaThuTucHanhChinh);
-        var tenTrangThai = GetTenTrangThaiHoSo(hoSo.TrangThaiHoSo);
-
-        // Tạo DTO một cách an toàn
-        var hoSoDetails = new HoSoDetailsDto
-        {
-            SoBienNhan = hoSo.SoBienNhan,
-            NgayNopHoSo = hoSo.NgayNopHoSo,
-            NgayTiepNhan = hoSo.NgayTiepNhan,
-            NgayHenTra = hoSo.NgayHenTra,
-            TrangThaiHoSo = hoSo.TrangThaiHoSo,
-            TenTrangThaiHoSo = tenTrangThai,
-            LyDoTuChoi = hoSo.LyDoTuChoi,
-            TenThuTucHanhChinh = tenThuTuc,
-            NguoiNopDon = new NguoiNopDonDto
-            {
-                HoTen = nguoiNopDon.HoTen,
-                GioiTinh = nguoiNopDon.GioiTinh,
-                NgaySinh = nguoiNopDon.NgaySinh,
-                NamSinh = nguoiNopDon.NamSinh,
-                SoCCCD = nguoiNopDon.SoCCCD,
-                DiaChi = nguoiNopDon.DiaChi,
-                SoDienThoai = nguoiNopDon.SoDienThoai,
-                Email = nguoiNopDon.Email
-            },
-            ThongTinThuaDat = new ThongTinThuaDatDto
-            {
-                SoThuTuThua = thongTinThuaDat.SoThuTuThua,
-                SoHieuToBanDo = thongTinThuaDat.SoHieuToBanDo,
-                DiaChi = thongTinThuaDat.DiaChi
-            },
-            GiayToDinhKem = giayToDinhKemList.Select(g => new GiayToDinhKemDto
-            {
-                TenLoaiGiayTo = g.TenLoaiGiayTo,
-                DuongDanTapTin = g.DuongDanTapTin,
-                FileName = Path.GetFileName(g.DuongDanTapTin)
-            }).ToList()
-        };
-
-        return hoSoDetails;
-        // --- KẾT THÚC SỬA LỖI NULLREFERENCE ---
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Lỗi nghiêm trọng khi tra cứu chi tiết hồ sơ {ReceiptNumber}", receiptNumber);
-        return null; // Trả về null nếu có lỗi hệ thống
-    }
-}
 
         // Phương thức xử lý tra cứu nhanh thông tin hồ sơ
         public async Task<IActionResult> LookupHoSoByReceiptNumberAsync(HoSoLookupRequestDto dto)
@@ -361,12 +380,13 @@ namespace IdentityServerAPI.Services
                 var hoSoList = await _hoSoCollection.Find(h => h.UserId == user.Id)
                                                     .SortByDescending(h => h.NgayNopHoSo)
                                                     .ToListAsync();
-                
+
                 // Chuyển đổi sang một DTO đơn giản để hiển thị danh sách
                 var resultDto = new List<object>();
-                foreach(var hoSo in hoSoList)
+                foreach (var hoSo in hoSoList)
                 {
-                    resultDto.Add(new {
+                    resultDto.Add(new
+                    {
                         soBienNhan = hoSo.SoBienNhan,
                         ngayNop = hoSo.NgayNopHoSo,
                         trangThai = GetTenTrangThaiHoSo(hoSo.TrangThaiHoSo),
@@ -405,14 +425,28 @@ namespace IdentityServerAPI.Services
                 {
                     return new ForbidResult(); // 403 Forbidden
                 }
-                
+
                 // **KIỂM TRA TRẠNG THÁI HỒ SƠ** (Tùy chọn, nhưng rất nên có)
                 // Ví dụ: chỉ cho phép sửa khi hồ sơ ở trạng thái "Đã nộp", chưa được "Tiếp nhận"
                 if (hoSo.TrangThaiHoSo != HoSoStatus.DaNop)
                 {
                     return new BadRequestObjectResult(new { message = "Không thể chỉnh sửa hồ sơ đã được tiếp nhận xử lý." });
                 }
-                
+
+                // PHẦN SANITIZATION
+                dto.NguoiNopDon.HoTen = SanitizeToPlainText(dto.NguoiNopDon.HoTen);
+                dto.NguoiNopDon.DiaChi = !string.IsNullOrEmpty(dto.NguoiNopDon.DiaChi) ? SanitizeToPlainText(dto.NguoiNopDon.DiaChi) : null;
+                dto.ThongTinThuaDat.DiaChi = !string.IsNullOrEmpty(dto.ThongTinThuaDat.DiaChi) ? SanitizeToPlainText(dto.ThongTinThuaDat.DiaChi) : null;
+
+                if (dto.GiayToDinhKem != null)
+                {
+                    foreach (var giayTo in dto.GiayToDinhKem)
+                    {
+                        giayTo.TenLoaiGiayTo = SanitizeToPlainText(giayTo.TenLoaiGiayTo);
+                    }
+                }
+                // ================== KẾT THÚC PHẦN SANITIZATION ==================
+
                 // Cập nhật thông tin người nộp đơn
                 var nguoiNopUpdate = Builders<NguoiNopDon>.Update
                     .Set(n => n.HoTen, dto.NguoiNopDon.HoTen)
@@ -424,7 +458,7 @@ namespace IdentityServerAPI.Services
                     .Set(n => n.SoDienThoai, dto.NguoiNopDon.SoDienThoai)
                     .Set(n => n.Email, dto.NguoiNopDon.Email);
                 await _nguoiNopDonCollection.UpdateOneAsync(n => n.HoSoId == hoSo.Id, nguoiNopUpdate);
-                
+
                 // Cập nhật thông tin thửa đất
                 var thuaDatUpdate = Builders<ThongTinThuaDat>.Update
                     .Set(t => t.SoThuTuThua, dto.ThongTinThuaDat.SoThuTuThua)
@@ -432,7 +466,7 @@ namespace IdentityServerAPI.Services
                     .Set(t => t.DiaChi, dto.ThongTinThuaDat.DiaChi);
                 await _thongTinThuaDatCollection.UpdateOneAsync(t => t.HoSoId == hoSo.Id, thuaDatUpdate);
 
-                // Cập nhật giấy tờ đính kèm (Xóa hết cũ, thêm lại mới)
+                // Cập nhật giấy tờ đính kèm
                 await _giayToDinhKemCollection.DeleteManyAsync(g => g.HoSoId == hoSo.Id);
                 if (dto.GiayToDinhKem != null && dto.GiayToDinhKem.Any())
                 {
@@ -477,6 +511,35 @@ namespace IdentityServerAPI.Services
                 HoSoStatus.TuChoi => "Bị từ chối",
                 _ => "Không xác định"
             };
+        }
+        
+        /// <summary>
+        /// Phân tích một chuỗi HTML và trả về nội dung văn bản thuần túy (plain text).
+        /// Phương thức này loại bỏ tất cả các thẻ HTML và trả về văn bản một cách chính xác.
+        /// </summary>
+        /// <param name="html">Chuỗi đầu vào có thể chứa mã HTML.</param>
+        /// <returns>Chuỗi văn bản thuần túy đã được làm sạch.</returns>
+        private string SanitizeToPlainText(string html)
+        {
+            if (string.IsNullOrEmpty(html))
+            {
+                return html;
+            }
+            
+            // 1. Khởi tạo một parser HTML
+            var parser = new HtmlParser();
+            
+            // 2. Phân tích chuỗi đầu vào thành một tài liệu HTML
+            var document = parser.ParseDocument(html);
+            
+            // 3. Trích xuất nội dung văn bản thô (có thể chứa nhiều khoảng trắng thừa)
+            string rawText = document.Body.TextContent;
+            
+            // 4. Thay thế một hoặc nhiều ký tự khoảng trắng bằng một dấu cách duy nhất
+            // và cắt bỏ khoảng trắng ở hai đầu (Trim).
+            string cleanedText = Regex.Replace(rawText, @"\s+", " ").Trim();
+            
+            return cleanedText;
         }
     }
 }

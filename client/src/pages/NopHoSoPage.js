@@ -115,14 +115,36 @@ const NopHoSoPage = () => {
             }
         } else if (section === 'nguoiNop') {
             const { nguoiNopDon } = formData;
+            // Kiểm tra các trường bắt buộc
             if (!nguoiNopDon.hoTen?.trim()) errors.hoTen = "Họ tên là bắt buộc.";
             if (!nguoiNopDon.soCCCD?.trim()) errors.soCCCD = "Số CCCD là bắt buộc.";
             if (!nguoiNopDon.soDienThoai?.trim()) errors.soDienThoai = "Số điện thoại là bắt buộc.";
+
+            // Kiểm tra định dạng chi tiết
+            if (nguoiNopDon.soCCCD?.trim() && nguoiNopDon.soCCCD.length !== 12) {
+                errors.soCCCD = "Số CCCD phải có đúng 12 ký tự.";
+            }
+            if (nguoiNopDon.soDienThoai?.trim() && !/^0[0-9]{9,10}$/.test(nguoiNopDon.soDienThoai)) {
+                errors.soDienThoai = "Số điện thoại phải bắt đầu bằng 0 và có 10-11 chữ số.";
+            }
+            if (nguoiNopDon.email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nguoiNopDon.email)) {
+                errors.email = "Định dạng email không hợp lệ.";
+            }
+
             if (Object.keys(errors).length > 0) isValid = false;
         } else if (section === 'thuaDat') {
             const { thongTinThuaDat } = formData;
             if (!thongTinThuaDat.soThuTuThua?.trim()) errors.soThuTuThua = "Số thứ tự thửa là bắt buộc.";
             if (!thongTinThuaDat.soHieuToBanDo?.trim()) errors.soHieuToBanDo = "Số hiệu tờ bản đồ là bắt buộc.";
+
+            // Kiểm tra định dạng số
+            if (thongTinThuaDat.soThuTuThua?.trim() && !/^[0-9]+$/.test(thongTinThuaDat.soThuTuThua)) {
+                errors.soThuTuThua = "Số thứ tự thửa chỉ được chứa ký tự số.";
+            }
+             if (thongTinThuaDat.soHieuToBanDo?.trim() && !/^[0-9]+$/.test(thongTinThuaDat.soHieuToBanDo)) {
+                errors.soHieuToBanDo = "Số hiệu tờ bản đồ chỉ được chứa ký tự số.";
+            }
+
             if (Object.keys(errors).length > 0) isValid = false;
         } else if (section === 'giayTo') {
             if (formData.giayToDinhKem.length === 0) {
@@ -173,7 +195,13 @@ const NopHoSoPage = () => {
             setSubmissionResult({ soBienNhan: response.data.soBienNhan });
         } catch (error) {
             console.error("Submit error:", error.response?.data || error);
-            setSubmitError(error.response?.data?.message || "Nộp hồ sơ thất bại. Vui lòng thử lại.");
+            // Xử lý lỗi validation từ backend (dự phòng) hoặc các lỗi server khác
+            const backendErrors = error.response?.data?.errors;
+            if (error.response?.status === 400 && backendErrors) {
+                 setSubmitError("Nộp hồ sơ thất bại. Vui lòng kiểm tra lại các thông tin đã cung cấp.");
+            } else {
+                 setSubmitError(error.response?.data?.message || "Nộp hồ sơ thất bại. Vui lòng thử lại.");
+            }
         } finally {
             setIsSubmitting(false);
         }

@@ -16,16 +16,17 @@ const getRecentLegalDocuments = (limit = 5) => {
   return apiClient.get(`/homepage/legal-documents?limit=${limit}`);
 };
 
-// Tra cứu nhanh hồ sơ theo số biên nhận
-const lookupHoSo = (receiptNumber) => {
-    return apiClient.get(`/hoso/lookup?receiptNumber=${receiptNumber}`);
-}
+// COMMENT do hàm này bây giờ đã chuyển qua hoSoService.js
+// // Tra cứu nhanh hồ sơ theo số biên nhận
+// const lookupHoSo = (receiptNumber) => {
+//     return apiClient.get(`/hoso/lookup?receiptNumber=${receiptNumber}`);
+// }
 
 const homepageService = {
   getStatistics,
   getRecentNews,
   getRecentLegalDocuments,
-  lookupHoSo,
+  // lookupHoSo,
 };
 
 export default homepageService;
