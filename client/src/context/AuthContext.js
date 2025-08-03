@@ -30,8 +30,7 @@ export const AuthProvider = ({ children }) => {
                     // Token không hợp lệ (hết hạn, bị thu hồi, ...)
                     console.error("Auth check failed:", error);
                     localStorage.removeItem('authToken');
-                    // <<< THAY ĐỔI DUY NHẤT: KHÔNG XÓA GLOBAL HEADER Ở ĐÂY
-                    // setGlobalAuthHeader(null);
+                    setGlobalAuthHeader(null);
                     setUser(null);
                     setIsAuthenticated(false);
                 }
