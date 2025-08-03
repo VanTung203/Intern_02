@@ -54,17 +54,17 @@ const LookupSection = () => {
             // LOGIC TIMEOUT
             // Đặt một "đồng hồ hẹn giờ". Nếu sau 100 giây mà chưa có kết quả,
             // nó sẽ tự động hủy và báo lỗi hết hạn.
-            timeoutIdRef.current = setTimeout(() => {
-                // Chỉ hủy nếu vẫn đang loading (kiểm tra qua ref)
-                if (isLoadingRef.current) {
-                    setError('Xác thực CAPTCHA hết hạn. Vui lòng thử lại.');
-                    setLoading(false);
-                    const badge = document.querySelector('.grecaptcha-badge');
-                    if (badge) badge.style.visibility = 'hidden';
-                    // Đóng cửa sổ giải test
-                    recaptchaRef.current.reset(); 
-                }
-            }, 100000); // 100 giây, hơi ít hơn 2 phút cho an toàn
+            // timeoutIdRef.current = setTimeout(() => {
+            //     // Chỉ hủy nếu vẫn đang loading (kiểm tra qua ref)
+            //     if (isLoadingRef.current) {
+            //         setError('Xác thực CAPTCHA hết hạn. Vui lòng thử lại.');
+            //         setLoading(false);
+            //         const badge = document.querySelector('.grecaptcha-badge');
+            //         if (badge) badge.style.visibility = 'hidden';
+            //         // Đóng cửa sổ giải test
+            //         recaptchaRef.current.reset(); 
+            //     }
+            // }, 100000); // 100 giây, hơi ít hơn 2 phút cho an toàn
             
             recaptchaRef.current.reset();
             recaptchaRef.current.execute();

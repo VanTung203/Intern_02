@@ -337,7 +337,7 @@ const UserProfileInfoForm = () => {
                 {renderFloatingLabelSelectField({ name: "provinceCode", labelText: "Tỉnh/Thành phố", value: profile.provinceCode, onChange: handleChange, options: provinces, disabled: isSubmitting })}
                 {renderFloatingLabelSelectField({ name: "districtCode", labelText: "Quận/Huyện", value: profile.districtCode, onChange: handleChange, options: districts, disabled: !profile.provinceCode || isSubmitting })}
                 {renderFloatingLabelSelectField({ name: "wardCode", labelText: "Phường/Xã", value: profile.wardCode, onChange: handleChange, options: wards, disabled: !profile.districtCode || isSubmitting })}
-                {renderFloatingLabelTextField({ name: "streetAddress", labelText: "Địa chỉ", value: profile.streetAddress, onChange: handleChange, placeholder: "Số nhà, tên đường...", disabled: isSubmitting, gridSize: { xs: 12 }, boxSx: { minWidth: '310%' } })}
+                {renderFloatingLabelTextField({ name: "streetAddress", labelText: "Địa chỉ", value: profile.streetAddress, onChange: handleChange, placeholder: "Số nhà, tên đường...", disabled: isSubmitting, gridSize: { xs: 12 } })}
             </Grid>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto', pt: 5, mr: 2 }}>
