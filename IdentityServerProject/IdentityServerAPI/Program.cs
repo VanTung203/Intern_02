@@ -82,7 +82,8 @@ builder.Services.AddScoped<IHomepageService, HomepageService>();
 builder.Services.AddScoped<IHoSoService, HoSoService>();
 
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
-builder.Services.AddScoped<IReCaptchaService, ReCaptchaService>();
+// Comment do bị lỗi Timeout
+// builder.Services.AddScoped<IReCaptchaService, ReCaptchaService>();
 
 builder.Services.AddHttpContextAccessor(); 
 

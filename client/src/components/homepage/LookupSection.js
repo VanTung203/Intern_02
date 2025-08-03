@@ -16,17 +16,26 @@ const LookupSection = () => {
     const [error, setError] = useState('');
     const recaptchaRef = useRef(null);
 
-    // Dùng ref để theo dõi trạng thái loading mà không gây re-render
-    const isLoadingRef = useRef(false);
-
     // Dùng ref để lưu trữ ID của timeout
     const timeoutIdRef = useRef(null);
 
-    // Giữ cho ref luôn đồng bộ với state
-    isLoadingRef.current = loading;
+    // Dùng ref để theo dõi trạng thái loading mà không gây re-render
+    const isLoadingRef = useRef(false);
+
+    // <<< THAY ĐỔI: Sử dụng useEffect để đồng bộ hóa isLoadingRef với state `loading`
+    // Đây là cách làm đúng trong React để giữ một ref đồng bộ với state.
+    useEffect(() => {
+        isLoadingRef.current = loading;
+    }, [loading]);
+
+    // COMMTENT: // Giữ cho ref luôn đồng bộ với state
+    // isLoadingRef.current = loading;
 
     const handleLookupClick = () => {
-        if (loading) return;
+        // <<< THAY ĐỔI: Sử dụng isLoadingRef.current để kiểm tra ngay lập tức
+        // Điều này sẽ ngăn chặn Race Condition
+        if (isLoadingRef.current) return;
+        // if (loading) return;
         setError('');
         setLookupResult(null);
 
@@ -46,7 +55,8 @@ const LookupSection = () => {
             // Đặt một "đồng hồ hẹn giờ". Nếu sau 100 giây mà chưa có kết quả,
             // nó sẽ tự động hủy và báo lỗi hết hạn.
             timeoutIdRef.current = setTimeout(() => {
-                if (isLoadingRef.current) { // Chỉ hủy nếu vẫn đang loading
+                // Chỉ hủy nếu vẫn đang loading (kiểm tra qua ref)
+                if (isLoadingRef.current) {
                     setError('Xác thực CAPTCHA hết hạn. Vui lòng thử lại.');
                     setLoading(false);
                     const badge = document.querySelector('.grecaptcha-badge');
@@ -113,6 +123,8 @@ const LookupSection = () => {
                 sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
                 onChange={onRecaptchaChange}
                 onErrored={() => {
+                    // <<< THÊM: Dọn dẹp timeout khi có lỗi
+                    clearTimeout(timeoutIdRef.current);
                     setError("Lỗi kết nối tới reCAPTCHA. Vui lòng thử lại.");
                     setLoading(false);
                     const badge = document.querySelector('.grecaptcha-badge');
