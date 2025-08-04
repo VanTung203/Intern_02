@@ -11,8 +11,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Security.Claims;
-using System.Text.Json;
+// using System.Text.Json;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver.GeoJsonObjectModel;
+// using Newtonsoft.Json;
+using MongoDB.Bson.Serialization;
 
 namespace IdentityServerAPI.Services
 {
@@ -69,7 +72,9 @@ namespace IdentityServerAPI.Services
                 }
 
                 var jsonText = await System.IO.File.ReadAllTextAsync(jsonFilePath);
-                var thuTucList = JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // var thuTucList = JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // Thêm "System.Text.Json." vào trước JsonSerializer
+                var thuTucList = System.Text.Json.JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 return new OkObjectResult(thuTucList);
             }
@@ -201,7 +206,11 @@ namespace IdentityServerAPI.Services
                     HoSoId = newHoSo.Id, // <<< Liên kết quan trọng
                     SoThuTuThua = dto.ThongTinThuaDat.SoThuTuThua,
                     SoHieuToBanDo = dto.ThongTinThuaDat.SoHieuToBanDo,
-                    DiaChi = dto.ThongTinThuaDat.DiaChi
+                    DiaChi = dto.ThongTinThuaDat.DiaChi,
+                    // --- THÊM LOGIC XỬ LÝ GEOMETRY ---
+                    Geometry = !string.IsNullOrEmpty(dto.ThongTinThuaDat.Geometry)
+                        ? BsonSerializer.Deserialize<GeoJsonPolygon<GeoJson2DCoordinates>>(dto.ThongTinThuaDat.Geometry)
+                        : null
                 };
                 await _thongTinThuaDatCollection.InsertOneAsync(newThongTinThuaDat);
 
@@ -496,7 +505,8 @@ namespace IdentityServerAPI.Services
             if (!System.IO.File.Exists(jsonFilePath)) return "Không xác định";
 
             var jsonText = await System.IO.File.ReadAllTextAsync(jsonFilePath);
-            var thuTucList = JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            // var thuTucList = JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var thuTucList = System.Text.Json.JsonSerializer.Deserialize<List<ThuTucHanhChinh>>(jsonText, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             return thuTucList?.FirstOrDefault(t => t.Id == id)?.Ten ?? "Không xác định";
         }
@@ -512,7 +522,7 @@ namespace IdentityServerAPI.Services
                 _ => "Không xác định"
             };
         }
-        
+
         /// <summary>
         /// Phân tích một chuỗi HTML và trả về nội dung văn bản thuần túy (plain text).
         /// Phương thức này loại bỏ tất cả các thẻ HTML và trả về văn bản một cách chính xác.
@@ -525,20 +535,20 @@ namespace IdentityServerAPI.Services
             {
                 return html;
             }
-            
+
             // 1. Khởi tạo một parser HTML
             var parser = new HtmlParser();
-            
+
             // 2. Phân tích chuỗi đầu vào thành một tài liệu HTML
             var document = parser.ParseDocument(html);
-            
+
             // 3. Trích xuất nội dung văn bản thô (có thể chứa nhiều khoảng trắng thừa)
             string rawText = document.Body.TextContent;
-            
+
             // 4. Thay thế một hoặc nhiều ký tự khoảng trắng bằng một dấu cách duy nhất
             // và cắt bỏ khoảng trắng ở hai đầu (Trim).
             string cleanedText = Regex.Replace(rawText, @"\s+", " ").Trim();
-            
+
             return cleanedText;
         }
     }

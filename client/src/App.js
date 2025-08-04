@@ -21,6 +21,7 @@ import TwoFactorAuthPage from './pages/TwoFactorAuthPage';
 import GoogleSigninSuccessPage from './pages/GoogleSigninSuccessPage';
 import HomePage from './pages/homepage/HomePage';
 import TraCuuHoSoPage from './pages/TraCuuHoSoPage';
+import TraCuuThuaDatPage from './pages/TraCuuThuaDatPage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
@@ -62,6 +63,7 @@ function App() {
             <Route path="/chinh-sua-ho-so/:soBienNhan" element={<ChinhSuaHoSoPage />} />
           </Route>
           <Route path="/tra-cuu-ho-so" element={<TraCuuHoSoPage />} />
+          <Route path="/tra-cuu-thua-dat" element={<TraCuuThuaDatPage />} />
         </Route>
 
         <Route path="/register" element={<RegisterPage />} />

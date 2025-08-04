@@ -80,6 +80,7 @@ builder.Services.AddScoped<IAuthService, AuthService>(); // AuthService là nơi
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHomepageService, HomepageService>();
 builder.Services.AddScoped<IHoSoService, HoSoService>();
+builder.Services.AddScoped<IThuaDatService, ThuaDatService>();
 
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
 // Comment do bị lỗi Timeout

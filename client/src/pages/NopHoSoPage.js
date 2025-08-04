@@ -58,7 +58,7 @@ const NopHoSoPage = () => {
     const [formData, setFormData] = useState({
         maThuTucHanhChinh: '',
         nguoiNopDon: { hoTen: '', gioiTinh: 1, ngaySinh: '', namSinh: '', soCCCD: '', soDienThoai: '', email: '', diaChi: '' },
-        thongTinThuaDat: { soThuTuThua: '', soHieuToBanDo: '', diaChi: '' },
+        thongTinThuaDat: { soThuTuThua: '', soHieuToBanDo: '', diaChi: '', geometry: null },
         giayToDinhKem: [],
     });
     const [thuTucList, setThuTucList] = useState([]);
@@ -183,6 +183,9 @@ const NopHoSoPage = () => {
                 soThuTuThua: formData.thongTinThuaDat.soThuTuThua,
                 soHieuToBanDo: formData.thongTinThuaDat.soHieuToBanDo,
                 diaChi: formData.thongTinThuaDat.diaChi || null,
+                geometry: formData.thongTinThuaDat.geometry 
+                    ? JSON.stringify(formData.thongTinThuaDat.geometry) 
+                    : null
             },
             giayToDinhKem: formData.giayToDinhKem.map(gt => ({
                 tenLoaiGiayTo: gt.tenLoaiGiayTo,
