@@ -3,7 +3,7 @@
 
 import React from 'react';
 import {
-    Box, Grid, Typography, Paper, List, ListItem, ListItemIcon, ListItemText, Divider, Chip
+    Box, Grid, Typography, Paper, List, ListItem, ListItemIcon, ListItemText, Divider, Stepper, Step, StepLabel, Alert
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import MapIcon from '@mui/icons-material/Map';
@@ -28,13 +28,30 @@ const InfoRow = ({ label, value, isMissing = false }) => (
     </Box>
 );
 
+// THÊM CÁC HẰNG SỐ ĐỂ CODE DỄ ĐỌC VÀ BẢO TRÌ
+// Tương ứng với Enum HoSoStatus.cs từ backend
+const HoSoStatus = {
+    DaNop: 0,
+    DaTiepNhanVaXuLy: 1,
+    DaTra: 2,
+    TuChoi: 3
+};
+
+// Các bước trong quy trình xử lý hồ sơ
+const steps = [
+  'Đã nộp',
+  'Đã tiếp nhận và xử lý',
+  'Đã trả kết quả'
+];
+
 // Component chính để hiển thị
 const HoSoDetailsDisplay = ({ data }) => {
     if (!data) return null;
 
     const { 
       soBienNhan, 
-      ngayNopHoSo, 
+      ngayNopHoSo,
+      trangThaiHoSo, // Thêm biến này để lấy trạng thái dạng số (0, 1, 2, 3)
       tenTrangThaiHoSo,
       lyDoTuChoi,
       tenThuTucHanhChinh,
@@ -43,11 +60,11 @@ const HoSoDetailsDisplay = ({ data }) => {
       giayToDinhKem 
     } = data;
     
-    const getStatusColor = (status) => {
-        if (status?.includes('Đã trả')) return 'success';
-        if (status?.includes('từ chối') || status?.includes('Yêu cầu')) return 'error';
-        return 'info';
-    };
+    // const getStatusColor = (status) => {
+    //     if (status?.includes('Đã trả')) return 'success';
+    //     if (status?.includes('từ chối') || status?.includes('Yêu cầu')) return 'error';
+    //     return 'info';
+    // };
 
     return (
         <Paper sx={{ p: 3, mt: 4, border: '1px solid', borderColor: 'divider' }} variant="outlined">
@@ -67,10 +84,24 @@ const HoSoDetailsDisplay = ({ data }) => {
                             <Grid item xs={12} sm={12}><InfoRow label="Số biên nhận" value={soBienNhan} /></Grid>
                             <Grid item xs={12} sm={12}><InfoRow label="Ngày nộp" value={new Date(ngayNopHoSo).toLocaleString('vi-VN')} /></Grid>
                             <Grid item xs={12}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
-                                    <Chip label={tenTrangThaiHoSo} color={getStatusColor(tenTrangThaiHoSo)} size="small" />
-                                </Box>
+                                <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
+                                {trangThaiHoSo === HoSoStatus.TuChoi ? (
+                                    // Nếu hồ sơ bị từ chối -> Hiển thị Alert
+                                    <Alert severity="error" sx={{ mt: 1 }}>
+                                        Hồ sơ đã bị từ chối.
+                                    </Alert>
+                                ) : (
+                                    // Ngược lại -> Hiển thị Stepper
+                                    <Box sx={{ width: '100%', pt: 1 }}>
+                                        <Stepper activeStep={trangThaiHoSo} alternativeLabel>
+                                            {steps.map((label) => (
+                                                <Step key={label}>
+                                                    <StepLabel>{label}</StepLabel>
+                                                </Step>
+                                            ))}
+                                        </Stepper>
+                                    </Box>
+                                )}
                             </Grid>
                              {lyDoTuChoi && (
                                 <Grid item xs={12}><InfoRow label="Lý do từ chối/bổ sung" value={lyDoTuChoi} isMissing={true} /></Grid>
