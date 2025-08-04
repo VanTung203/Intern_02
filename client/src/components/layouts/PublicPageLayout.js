@@ -4,6 +4,8 @@ import { Box, Grid, Typography, Link as MuiLink, AppBar, Toolbar, Container } fr
 // Không cần Paper ở đây vì trang con sẽ quyết định dùng Paper hay không
 // import { Link as RouterLink } from 'react-router-dom'; // Chỉ cần nếu header có link điều hướng chung bằng RouterLink
 import ChatWidget from '../../components/chat/ChatWidget';
+import logo_Vietbando from '../../assets/logo_Vietbando.png';
+import image_register from '../../assets/image_register.png';
 
 // --- Component Logo với Text (Tái sử dụng) ---
 // Có thể cân nhắc đưa component này ra một file riêng (ví dụ: src/components/common/AppLogo.js)
@@ -11,8 +13,10 @@ import ChatWidget from '../../components/chat/ChatWidget';
 const VietbandoLogoWithText = () => (
     <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
         <img
-            src={`${process.env.PUBLIC_URL}/logo_Vietbando.png`} // Đảm bảo file này tồn tại
-            alt="Vietbando Logo"
+            // src={`${process.env.PUBLIC_URL}/logo_Vietbando.png`} // Đảm bảo file này tồn tại
+            src={logo_Vietbando}
+            // alt="Vietbando Logo"
+            alt="Logo"
             style={{ height: '40px', marginRight: '5px' }} // Điều chỉnh style cho khớp
         />
         <Typography
@@ -35,6 +39,8 @@ const VietbandoLogoWithText = () => (
 const RegistrationIllustration = () => (
     <Box
         component="img"
+        src={image_register}
+        alt="Register Illustration"
         sx={{
             height: 'auto',
             width: '100%',
@@ -43,8 +49,8 @@ const RegistrationIllustration = () => (
             mx: 'auto',
             mt: { xs: 3, sm: 6 }
         }}
-        alt="Register Illustration"
-        src={`${process.env.PUBLIC_URL}/image_register.png`}
+        // alt="Register Illustration"
+        // src={`${process.env.PUBLIC_URL}/image_register.png`}
     />
 );
 

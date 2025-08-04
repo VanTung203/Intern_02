@@ -57,15 +57,15 @@ const HoSoDetailsDisplay = ({ data }) => {
             <Divider sx={{ mb: 3 }} />
 
             <Grid container spacing={3}>
-                {/* --- Thông tin chung của hồ sơ --- */}
+                {/* Tiến độ của hồ sơ */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2.5 }} variant="outlined" >
                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
                             <ArticleIcon sx={{ mr: 1, color: 'primary.main' }} /> THÔNG TIN HỒ SƠ
                         </Typography>
                         <Grid container spacing={1}>
-                            <Grid item xs={12} sm={6}><InfoRow label="Số biên nhận" value={soBienNhan} /></Grid>
-                            <Grid item xs={12} sm={6}><InfoRow label="Ngày nộp" value={new Date(ngayNopHoSo).toLocaleString('vi-VN')} /></Grid>
+                            <Grid item xs={12} sm={12}><InfoRow label="Số biên nhận" value={soBienNhan} /></Grid>
+                            <Grid item xs={12} sm={12}><InfoRow label="Ngày nộp" value={new Date(ngayNopHoSo).toLocaleString('vi-VN')} /></Grid>
                             <Grid item xs={12}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
@@ -79,8 +79,8 @@ const HoSoDetailsDisplay = ({ data }) => {
                     </Paper>
                 </Grid>
                 
-                {/* --- Người nộp --- */}
-                <Grid item xs={12} md={6}>
+                {/* Thông tin người nộp */}
+                <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 2.5, height: '100%' }} variant="outlined">
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
                             <PersonIcon sx={{ mr: 1, color: 'primary.main' }} /> THÔNG TIN NGƯỜI NỘP
@@ -95,16 +95,29 @@ const HoSoDetailsDisplay = ({ data }) => {
                     </Paper>
                 </Grid>
 
-                {/* --- Thủ tục & Giấy tờ --- */}
-                <Grid item xs={12} md={6}>
+                {/* Thủ tục & Thông tin thửa đất */}
+                <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 2.5, mb: 3 }} variant="outlined">
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
                             <GavelIcon sx={{ mr: 1, color: 'primary.main' }} /> THỦ TỤC HÀNH CHÍNH
                         </Typography>
                         <Typography variant="body2">{tenThuTucHanhChinh}</Typography>
                     </Paper>
-                    
-                    <Paper sx={{ p: 2.5, height: 'calc(100% - 110px)' }} variant="outlined">
+                    <Paper sx={{ p: 2.5 }} variant="outlined">
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
+                            <MapIcon sx={{ mr: 1, color: 'primary.main' }} /> THÔNG TIN THỬA ĐẤT
+                        </Typography>
+                        <Grid container spacing={1}>
+                            <Grid item xs={12}><InfoRow label="Số thứ tự thửa" value={thongTinThuaDat.soThuTuThua} /></Grid>
+                            <Grid item xs={12}><InfoRow label="Số hiệu tờ bản đồ" value={thongTinThuaDat.soHieuToBanDo} /></Grid>
+                            <Grid item xs={12}><InfoRow label="Địa chỉ" value={thongTinThuaDat.diaChi} /></Grid>
+                        </Grid>
+                    </Paper>
+                </Grid>
+
+                 {/* Giấy tờ đính kèm */}
+                 <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2.5, height: '100%' }} variant="outlined">
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
                             <AttachFileIcon sx={{ mr: 1, color: 'primary.main' }} /> GIẤY TỜ ĐÍNH KÈM
                         </Typography>
@@ -121,20 +134,7 @@ const HoSoDetailsDisplay = ({ data }) => {
                             )}
                         </List>
                     </Paper>
-                </Grid>
 
-                 {/* --- Thông tin thửa đất --- */}
-                 <Grid item xs={12}>
-                    <Paper sx={{ p: 2.5 }} variant="outlined">
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
-                            <MapIcon sx={{ mr: 1, color: 'primary.main' }} /> THÔNG TIN THỬA ĐẤT
-                        </Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}><InfoRow label="Số thứ tự thửa" value={thongTinThuaDat.soThuTuThua} /></Grid>
-                            <Grid item xs={6}><InfoRow label="Số hiệu tờ bản đồ" value={thongTinThuaDat.soHieuToBanDo} /></Grid>
-                            <Grid item xs={12}><InfoRow label="Địa chỉ" value={thongTinThuaDat.diaChi} /></Grid>
-                        </Grid>
-                    </Paper>
                 </Grid>
             </Grid>
         </Paper>

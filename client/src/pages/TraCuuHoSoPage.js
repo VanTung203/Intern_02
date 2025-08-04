@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { 
-    Container, Paper, Typography, TextField, Button, Box, CircularProgress, Alert 
+    Container, Paper, Typography, TextField, Button, Box, CircularProgress, Alert, Grid
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import hoSoService from '../services/hoSoService';
@@ -39,45 +39,53 @@ const TraCuuHoSoPage = () => {
     };
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-            <Paper sx={{ p: 4, mt: 2 }}>
+        <Container maxWidth="lg" sx={{ py: 1 }}>
+            <Paper sx={{ p: 2, mt: 2 }}>
                 <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
                     Tra cứu thông tin hồ sơ
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                    Nhập Số biên nhận và Số CCCD/Mã số giấy tờ để xem chi tiết và tiến độ xử lý hồ sơ của bạn.
+                    Nhập Số biên nhận và Số CCCD để xem chi tiết và tiến độ xử lý hồ sơ của bạn.
                 </Typography>
 
                 <Box component="form" onSubmit={handleSearch} noValidate>
-                    <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Số biên nhận"
-                        value={receiptNumber}
-                        onChange={(e) => setReceiptNumber(e.target.value)}
-                        required
-                        error={!!error && !receiptNumber}
-                    />
-                    <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Số CCCD/Mã số giấy tờ"
-                        value={cccd}
-                        onChange={(e) => setCccd(e.target.value)}
-                        required
-                        error={!!error && !cccd}
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        size="large"
-                        startIcon={<SearchIcon />}
-                        disabled={isLoading}
-                        sx={{ mt: 2, py: 1.5 }}
-                    >
-                        {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Tra cứu'}
-                    </Button>
+                    <Grid container spacing={2}> 
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                // Loại bỏ thuộc tính margin="normal" vì spacing của Grid đã xử lý khoảng cách
+                                label="Số biên nhận"
+                                value={receiptNumber}
+                                onChange={(e) => setReceiptNumber(e.target.value)}
+                                required
+                                error={!!error && !receiptNumber}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                // Loại bỏ thuộc tính margin="normal"
+                                label="Số CCCD"
+                                value={cccd}
+                                onChange={(e) => setCccd(e.target.value)}
+                                required
+                                error={!!error && !cccd}
+                            />
+                        </Grid>
+                        <Grid item xs={12}> {/* Thêm một Grid item mới cho nút */}
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                size="large"
+                                startIcon={<SearchIcon />}
+                                disabled={isLoading}
+                                sx={{ mt: 2, py: 1.5 }}
+                            >
+                                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Tra cứu'}
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </Box>
             </Paper>
 

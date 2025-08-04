@@ -64,7 +64,7 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
             </Typography>
             <Paper sx={{ p: 3, borderRadius: 2 }} variant="outlined">
                 <Grid container spacing={2.5}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={2.5}>
                         <TextField
                             required
                             name="soThuTuThua"
@@ -76,7 +76,7 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
                             helperText={showValidation && errors.soThuTuThua}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={2.5}>
                         <TextField
                             required
                             name="soHieuToBanDo"
@@ -88,12 +88,12 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
                             helperText={showValidation && errors.soHieuToBanDo}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sm={7}>
                         <TextField
                             name="diaChi"
                             label="Địa chỉ chi tiết thửa đất"
-                            multiline
-                            rows={2}
+                            // multiline
+                            // rows={2}
                             fullWidth
                             value={thongTinThuaDat.diaChi || ''}
                             onChange={handleChange}

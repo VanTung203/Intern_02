@@ -3,7 +3,7 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, Link, Container } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import logo from '../../assets/logo_Vietbando.png';
+import logo_Vietbando from '../../assets/logo_Vietbando.png';
 import { useAuth } from '../../context/AuthContext';
 import UserMenu from './UserMenu';
 
@@ -19,7 +19,7 @@ const Header = () => {
           <Toolbar disableGutters>
             {/* <<< BỌC LOGO VÀ TIÊU ĐỀ TRONG LINK >>> */}
             <Link component={RouterLink} to="/" sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, textDecoration: 'none', color: 'text.primary' }}>
-              <img src={logo} alt="Logo" style={{ height: '40px', marginRight: '16px' }} />
+              <img src={logo_Vietbando} alt="Logo" style={{ height: '40px', marginRight: '16px' }} />
               <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                 CỔNG DỊCH VỤ CÔNG ĐẤT ĐAI
               </Typography>

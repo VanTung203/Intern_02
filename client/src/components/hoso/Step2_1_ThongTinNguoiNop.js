@@ -23,7 +23,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
             </Typography>
             <Paper sx={{ p: 3, borderRadius: 2 }} variant="outlined">
                 <Grid container spacing={2.5}>
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} sm={4.5}>
                         <TextField
                             required
                             name="hoTen"
@@ -35,8 +35,8 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             helperText={showValidation && errors.hoTen}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth>
+                    <Grid item xs={12} sm={2.5}>
+                        <FormControl fullWidth size="small">
                             <InputLabel>Giới tính</InputLabel>
                             <Select name="gioiTinh" value={nguoiNopDon.gioiTinh || 1} label="Giới tính" onChange={handleChange}>
                                 <MenuItem value={1}>Nam</MenuItem>
@@ -44,7 +44,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={2.5}>
                         <TextField
                             name="ngaySinh"
                             label="Ngày sinh"
@@ -55,7 +55,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             InputLabelProps={{ shrink: true }}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={2.5}>
                         <TextField
                             name="namSinh"
                             label="Năm sinh"
@@ -65,7 +65,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             required
                             name="soCCCD"
@@ -77,7 +77,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             helperText={showValidation && errors.soCCCD}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             required
                             name="soDienThoai"
@@ -89,7 +89,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             helperText={showValidation && errors.soDienThoai}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             name="email"
                             label="Email"
@@ -107,7 +107,7 @@ const Step2_1_ThongTinNguoiNop = ({ formData, onDataChange, errors, showValidati
                             name="diaChi"
                             label="Địa chỉ"
                             multiline
-                            rows={3}
+                            rows={1}
                             fullWidth
                             value={nguoiNopDon.diaChi || ''}
                             onChange={handleChange}
