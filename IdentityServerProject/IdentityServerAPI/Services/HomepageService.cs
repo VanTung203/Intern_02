@@ -66,7 +66,7 @@ namespace IdentityServerAPI.Services
                     Id = n.Id,
                     TieuDe = n.TieuDe,
                     MoTaNgan = n.MoTaNgan,
-                    AnhDaiDienUrl = n.AnhDaiDienUrl,
+                    // AnhDaiDienUrl = n.AnhDaiDienUrl,
                     NgayDang = n.NgayDang
                 }).ToList();
 
@@ -81,7 +81,7 @@ namespace IdentityServerAPI.Services
 
         public async Task<IActionResult> GetRecentLegalDocumentsAsync(int limit)
         {
-             try
+            try
             {
                 var documents = await _vanBanPhapLuatCollection.Find(_ => true)
                                                   .SortByDescending(d => d.NgayBanHanh)
@@ -102,6 +102,54 @@ namespace IdentityServerAPI.Services
             {
                 _logger.LogError(ex, "Error getting recent legal documents.");
                 return new ObjectResult(new { message = "Lỗi máy chủ khi lấy văn bản pháp luật." }) { StatusCode = 500 };
+            }
+        }
+        
+        public async Task<IActionResult> GetAllNewsAsync()
+        {
+            try
+            {
+                var news = await _tinTucCollection.Find(_ => true)
+                                                  .SortByDescending(n => n.NgayDang) // Sắp xếp tin mới nhất lên đầu
+                                                  .ToListAsync();
+
+                // Dùng lại NewsArticleDto vì chỉ cần tiêu đề và mô tả ngắn
+                var newsDtos = news.Select(n => new NewsArticleDto
+                {
+                    Id = n.Id,
+                    TieuDe = n.TieuDe,
+                    MoTaNgan = n.MoTaNgan,
+                    NgayDang = n.NgayDang
+                }).ToList();
+
+                return new OkObjectResult(newsDtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all news articles.");
+                return new ObjectResult(new { message = "Lỗi máy chủ khi lấy danh sách bản tin." }) { StatusCode = 500 };
+            }
+        }
+
+        public async Task<IActionResult> GetNewsByIdAsync(string id)
+        {
+            try
+            {
+                var newsArticle = await _tinTucCollection.Find(n => n.Id == id).FirstOrDefaultAsync();
+
+                if (newsArticle == null)
+                {
+                    return new NotFoundObjectResult(new { message = "Không tìm thấy bản tin." });
+                }
+
+                // Trả về toàn bộ object TinTuc, vì frontend cần cả NoiDung
+                // Chúng ta không cần tạo DTO mới để giữ mọi thứ đơn giản theo yêu cầu
+                return new OkObjectResult(newsArticle);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting news article by ID.");
+                return new ObjectResult(new { message = "Lỗi máy chủ khi lấy chi tiết bản tin." }) { StatusCode = 500 };
             }
         }
     }

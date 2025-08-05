@@ -119,8 +119,15 @@ const TraCuuThuaDatPage = () => {
                             <TextField fullWidth label="Số tờ bản đồ" value={soTo} onChange={(e) => setSoTo(e.target.value)} required />
                         </Grid>
                         <Grid item xs={12} sm={2}>
-                            <Button type="submit" fullWidth variant="contained" size="large" startIcon={<SearchIcon />} disabled={isLoading}>
-                                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Tìm'}
+                            <Button 
+                                sx={{ backgroundColor: 'grey.800', '&:hover': { backgroundColor: 'grey.900' } }}
+                                type="submit" 
+                                fullWidth 
+                                variant="contained" 
+                                size="large" 
+                                startIcon={<SearchIcon />} 
+                                disabled={isLoading}>
+                                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Tra cứu'}
                             </Button>
                         </Grid>
                     </Grid>

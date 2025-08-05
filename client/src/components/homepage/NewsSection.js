@@ -1,7 +1,9 @@
 // src/components/homepage/NewsSection.js
 import React from 'react';
 import Slider from 'react-slick';
-import { Box, Typography, Card, CardContent } from '@mui/material';
+// --- THÊM IMPORT CardActionArea VÀ Link ---
+import { Box, Typography, Card, CardContent, CardActionArea } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 const NewsSection = ({ news }) => {
     const settings = {
@@ -32,44 +34,56 @@ const NewsSection = ({ news }) => {
     return (
         <Box sx={{ my: 4 }}>
             <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
-                Tin tức
+                Bản tin
             </Typography>
             <Slider {...settings}>
                 {news.map((article) => (
                     <Box key={article.id} sx={{ px: 2 }}>
-                        <Card sx={{ height: 220, display: 'flex', flexDirection: 'column' }}> {/* Đặt chiều cao cố định cho Card */}
-                            <CardContent sx={{ flexGrow: 1 }}> {/* Cho phép CardContent co giãn để lấp đầy thẻ */}
-                                <Typography 
-                                    gutterBottom 
-                                    variant="h6" 
-                                    component="div" 
-                                    sx={{ 
-                                        fontWeight: 'bold', 
-                                        // Dùng clamp để giới hạn số dòng hiển thị của tiêu đề
-                                        display: '-webkit-box',
-                                        '-webkit-box-orient': 'vertical',
-                                        '-webkit-line-clamp': '2',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        minHeight: '3.5em' // Đảm bảo chiều cao tối thiểu cho 2 dòng
-                                    }}
-                                >
-                                    {article.tieuDe}
-                                </Typography>
-                                <Typography 
-                                    variant="body2" 
-                                    color="text.secondary"
-                                    sx={{
-                                        display: '-webkit-box',
-                                        '-webkit-box-orient': 'vertical',
-                                        '-webkit-line-clamp': '4', // Giới hạn mô tả trong 4 dòng
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
-                                    }}
-                                >
-                                    {article.moTaNgan}
-                                </Typography>
-                            </CardContent>
+                        {/* 
+                          Thay đổi ở đây: 
+                          - Card sẽ có chiều cao 100% để linh hoạt theo Box cha.
+                          - Bọc toàn bộ CardContent bằng CardActionArea.
+                          - Dùng props 'component' và 'to' để biến CardActionArea thành một link điều hướng.
+                        */}
+                        <Card sx={{ height: 220, display: 'flex', flexDirection: 'column' }}>
+                            <CardActionArea 
+                                component={RouterLink} 
+                                to={`/ban-tin/${article.id}`}
+                                // Thêm style để CardActionArea chiếm toàn bộ không gian của Card
+                                sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
+                            >
+                                <CardContent sx={{ flexGrow: 1, width: '100%' }}>
+                                    <Typography 
+                                        gutterBottom 
+                                        variant="h6" 
+                                        component="div" 
+                                        sx={{ 
+                                            fontWeight: 'bold', 
+                                            display: '-webkit-box',
+                                            '-webkit-box-orient': 'vertical',
+                                            '-webkit-line-clamp': '2',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            minHeight: '3.5em'
+                                        }}
+                                    >
+                                        {article.tieuDe}
+                                    </Typography>
+                                    <Typography 
+                                        variant="body2" 
+                                        color="text.secondary"
+                                        sx={{
+                                            display: '-webkit-box',
+                                            '-webkit-box-orient': 'vertical',
+                                            '-webkit-line-clamp': '4',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
+                                        }}
+                                    >
+                                        {article.moTaNgan}
+                                    </Typography>
+                                </CardContent>
+                            </CardActionArea>
                         </Card>
                     </Box>
                 ))}

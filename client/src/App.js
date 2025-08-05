@@ -22,6 +22,8 @@ import GoogleSigninSuccessPage from './pages/GoogleSigninSuccessPage';
 import HomePage from './pages/homepage/HomePage';
 import TraCuuHoSoPage from './pages/TraCuuHoSoPage';
 import TraCuuThuaDatPage from './pages/TraCuuThuaDatPage';
+import BanTinListPage from './pages/BanTinListPage';
+import BanTinDetailPage from './pages/BanTinDetailPage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
@@ -64,6 +66,8 @@ function App() {
           </Route>
           <Route path="/tra-cuu-ho-so" element={<TraCuuHoSoPage />} />
           <Route path="/tra-cuu-thua-dat" element={<TraCuuThuaDatPage />} />
+          <Route path="/ban-tin" element={<BanTinListPage />} />
+          <Route path="/ban-tin/:id" element={<BanTinDetailPage />} />
         </Route>
 
         <Route path="/register" element={<RegisterPage />} />

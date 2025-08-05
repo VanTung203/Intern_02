@@ -387,25 +387,25 @@ async Task SeedDatabaseAsync(IServiceProvider services)
     }
     logger.LogInformation("Database seeding finished.");
     
-    // 3. Seed Sample Data for HoSo, TinTuc, VanBanPhapLuat
+    // 3. Seed Sample Data for HoSo (Bỏ seed cho TinTuc, VanBanPhapLuat)
     logger.LogInformation("Attempting to seed sample data for new collections...");
     var database = services.GetRequiredService<IMongoDatabase>();
     
-    // Seed Tin Tức
-    var tinTucCollection = database.GetCollection<TinTuc>("TinTuc");
-    if (await tinTucCollection.CountDocumentsAsync(_ => true) == 0)
-    {
-        logger.LogInformation("Seeding sample news articles...");
-        var sampleNews = new List<TinTuc>
-        {
-            new TinTuc { TieuDe = "Thẩm quyền cấp sổ đỏ tại Hà Nội mới nhất 2025", MoTaNgan = "Hiện nay thẩm quyền cấp sổ đỏ tại Hà Nội được quy định thế nào khi bỏ cấp huyện?", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+1" },
-            new TinTuc { TieuDe = "Quy định mới về cấp giấy chứng nhận quyền sử dụng đất", MoTaNgan = "Những thay đổi quan trọng trong Luật Đất đai (sửa đổi) mà người dân cần biết.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+2" },
-            new TinTuc { TieuDe = "Hướng dẫn nộp hồ sơ đất đai trực tuyến", MoTaNgan = "Các bước chi tiết để nộp hồ sơ đăng ký biến động đất đai qua cổng dịch vụ công quốc gia.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+3" },
-            new TinTuc { TieuDe = "Giá đất các quận trung tâm Hà Nội có thể tăng", MoTaNgan = "Dự thảo bảng giá đất mới cho giai đoạn 2025-2029 đang được lấy ý kiến.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+4" }
-        };
-        await tinTucCollection.InsertManyAsync(sampleNews);
-        logger.LogInformation("Seeded {Count} news articles.", sampleNews.Count);
-    }
+    // // Seed Tin Tức
+    // var tinTucCollection = database.GetCollection<TinTuc>("TinTuc");
+    // if (await tinTucCollection.CountDocumentsAsync(_ => true) == 0)
+    // {
+    //     logger.LogInformation("Seeding sample news articles...");
+    //     var sampleNews = new List<TinTuc>
+    //     {
+    //         new TinTuc { TieuDe = "Thẩm quyền cấp sổ đỏ tại Hà Nội mới nhất 2025", MoTaNgan = "Hiện nay thẩm quyền cấp sổ đỏ tại Hà Nội được quy định thế nào khi bỏ cấp huyện?", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+1" },
+    //         new TinTuc { TieuDe = "Quy định mới về cấp giấy chứng nhận quyền sử dụng đất", MoTaNgan = "Những thay đổi quan trọng trong Luật Đất đai (sửa đổi) mà người dân cần biết.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+2" },
+    //         new TinTuc { TieuDe = "Hướng dẫn nộp hồ sơ đất đai trực tuyến", MoTaNgan = "Các bước chi tiết để nộp hồ sơ đăng ký biến động đất đai qua cổng dịch vụ công quốc gia.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+3" },
+    //         new TinTuc { TieuDe = "Giá đất các quận trung tâm Hà Nội có thể tăng", MoTaNgan = "Dự thảo bảng giá đất mới cho giai đoạn 2025-2029 đang được lấy ý kiến.", AnhDaiDienUrl = "https://via.placeholder.com/350x200?text=Tin+Tuc+4" }
+    //     };
+    //     await tinTucCollection.InsertManyAsync(sampleNews);
+    //     logger.LogInformation("Seeded {Count} news articles.", sampleNews.Count);
+    // }
     
     // Seed Văn Bản Pháp Luật
     var vanBanCollection = database.GetCollection<VanBanPhapLuat>("VanBanPhapLuat");

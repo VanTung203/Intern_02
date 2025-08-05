@@ -50,7 +50,7 @@ const TraCuuHoSoPage = () => {
 
                 <Box component="form" onSubmit={handleSearch} noValidate>
                     <Grid container spacing={2}> 
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={5}>
                             <TextField
                                 fullWidth
                                 // Loại bỏ thuộc tính margin="normal" vì spacing của Grid đã xử lý khoảng cách
@@ -61,7 +61,7 @@ const TraCuuHoSoPage = () => {
                                 error={!!error && !receiptNumber}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={5}>
                             <TextField
                                 fullWidth
                                 // Loại bỏ thuộc tính margin="normal"
@@ -72,7 +72,7 @@ const TraCuuHoSoPage = () => {
                                 error={!!error && !cccd}
                             />
                         </Grid>
-                        <Grid item xs={12}> {/* Thêm một Grid item mới cho nút */}
+                        <Grid item xs={12} sm={2}> {/* Thêm một Grid item mới cho nút */}
                             <Button
                                 type="submit"
                                 fullWidth
@@ -80,9 +80,9 @@ const TraCuuHoSoPage = () => {
                                 size="large"
                                 startIcon={<SearchIcon />}
                                 disabled={isLoading}
-                                sx={{ mt: 2, py: 1.5 }}
+                                sx={{ backgroundColor: 'grey.800', '&:hover': { backgroundColor: 'grey.900' } }}
                             >
-                                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Tra cứu'}
+                                {isLoading ? <CircularProgress size={16} color="inherit" /> : 'Tra cứu'}
                             </Button>
                         </Grid>
                     </Grid>

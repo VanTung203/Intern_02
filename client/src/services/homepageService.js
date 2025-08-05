@@ -1,3 +1,4 @@
+// client/src/services/homepageService.js
 import apiClient from '../api/apiClient';
 
 // Lấy dữ liệu thống kê từ backend
@@ -16,6 +17,16 @@ const getRecentLegalDocuments = (limit = 5) => {
   return apiClient.get(`/homepage/legal-documents?limit=${limit}`);
 };
 
+// Lấy tất cả bản tin
+const getAllNews = () => {
+    return apiClient.get('/homepage/news/all');
+}
+
+// Lấy chi tiết một bản tin theo ID
+const getNewsById = (id) => {
+    return apiClient.get(`/homepage/news/${id}`);
+}
+
 // COMMENT do hàm này bây giờ đã chuyển qua hoSoService.js
 // // Tra cứu nhanh hồ sơ theo số biên nhận
 // const lookupHoSo = (receiptNumber) => {
@@ -26,6 +37,8 @@ const homepageService = {
   getStatistics,
   getRecentNews,
   getRecentLegalDocuments,
+  getAllNews,
+  getNewsById
   // lookupHoSo,
 };
 

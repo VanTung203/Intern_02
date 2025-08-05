@@ -18,8 +18,8 @@ namespace IdentityServerAPI.Models
         [BsonElement("NoiDung")]
         public string NoiDung { get; set; } = string.Empty;
 
-        [BsonElement("AnhDaiDienUrl")]
-        public string? AnhDaiDienUrl { get; set; }
+        // [BsonElement("AnhDaiDienUrl")]
+        // public string? AnhDaiDienUrl { get; set; }
 
         [BsonElement("NgayDang")]
         public DateTime NgayDang { get; set; } = DateTime.UtcNow;
