@@ -24,6 +24,8 @@ import TraCuuHoSoPage from './pages/TraCuuHoSoPage';
 import TraCuuThuaDatPage from './pages/TraCuuThuaDatPage';
 import BanTinListPage from './pages/BanTinListPage';
 import BanTinDetailPage from './pages/BanTinDetailPage';
+import VanBanListPage from './pages/VanBanListPage';
+import VanBanDetailPage from './pages/VanBanDetailPage';
 
 // Private Pages
 import UserProfilePage from './pages/UserProfilePage';
@@ -68,6 +70,8 @@ function App() {
           <Route path="/tra-cuu-thua-dat" element={<TraCuuThuaDatPage />} />
           <Route path="/ban-tin" element={<BanTinListPage />} />
           <Route path="/ban-tin/:id" element={<BanTinDetailPage />} />
+          <Route path="/van-ban" element={<VanBanListPage />} />
+          <Route path="/van-ban/:id" element={<VanBanDetailPage />} />
         </Route>
 
         <Route path="/register" element={<RegisterPage />} />

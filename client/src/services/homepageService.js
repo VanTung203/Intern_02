@@ -27,6 +27,16 @@ const getNewsById = (id) => {
     return apiClient.get(`/homepage/news/${id}`);
 }
 
+// Lấy tất cả văn bản pháp luật
+const getAllLegalDocuments = () => {
+    return apiClient.get('/homepage/legal-documents/all');
+}
+
+// Lấy chi tiết một văn bản pháp luật theo ID
+const getLegalDocumentById = (id) => {
+    return apiClient.get(`/homepage/legal-documents/${id}`);
+}
+
 // COMMENT do hàm này bây giờ đã chuyển qua hoSoService.js
 // // Tra cứu nhanh hồ sơ theo số biên nhận
 // const lookupHoSo = (receiptNumber) => {
@@ -38,7 +48,9 @@ const homepageService = {
   getRecentNews,
   getRecentLegalDocuments,
   getAllNews,
-  getNewsById
+  getNewsById,
+  getAllLegalDocuments,
+  getLegalDocumentById,
   // lookupHoSo,
 };
 

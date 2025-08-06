@@ -1,5 +1,7 @@
+// client/src/components/homepage/LegalDocumentsSection.js
 import React from 'react';
-import { Box, Typography, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { Box, Typography, Paper, List, ListItem, ListItemText, Divider, ListItemButton } from '@mui/material';
 
 const LegalDocumentsSection = ({ legalDocs }) => {
     return (
@@ -7,20 +9,36 @@ const LegalDocumentsSection = ({ legalDocs }) => {
             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Văn bản pháp luật
             </Typography>
-            <List>
+            <List sx={{ p: 0 }}>
                 {legalDocs.map((doc, index) => (
                     <React.Fragment key={doc.id}>
-                        <ListItem>
+                        {/* Thay ListItem bằng ListItemButton để có hiệu ứng và khả năng điều hướng */}
+                        <ListItemButton 
+                            component={RouterLink} 
+                            to={`/van-ban/${doc.id}`}
+                        >
                             <ListItemText 
                                 primary={doc.tieuDe}
-                                secondary={`Số hiệu: ${doc.soHieuVanBan} - Ngày ban hành: ${new Date(doc.ngayBanHanh).toLocaleDateString('vi-VN')}`}
+                                primaryTypographyProps={{ 
+                                    sx: { 
+                                        fontWeight: '500',
+                                        // Giới hạn tiêu đề trong 2 dòng
+                                        display: '-webkit-box',
+                                        '-webkit-box-orient': 'vertical',
+                                        '-webkit-line-clamp': '1',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    } 
+                                }}
+                                secondary={`Số hiệu: ${doc.soHieuVanBan} - Ngày: ${new Date(doc.ngayBanHanh).toLocaleDateString('vi-VN')}`}
                             />
-                        </ListItem>
-                        {index < legalDocs.length - 1 && <Divider />}
+                        </ListItemButton>
+                        {index < legalDocs.length - 1 && <Divider component="li" />}
                     </React.Fragment>
                 ))}
             </List>
         </Paper>
     );
 }
+
 export default LegalDocumentsSection;

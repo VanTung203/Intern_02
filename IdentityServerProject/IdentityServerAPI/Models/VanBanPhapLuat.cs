@@ -12,13 +12,16 @@ namespace IdentityServerAPI.Models
         [BsonElement("TieuDe")]
         public string TieuDe { get; set; } = string.Empty;
 
+        [BsonElement("NoiDungVanBan")]
+        public string NoiDungVanBan { get; set; } = string.Empty;
+
         [BsonElement("SoHieuVanBan")]
         public string SoHieuVanBan { get; set; } = string.Empty;
 
         [BsonElement("NgayBanHanh")]
         public DateTime NgayBanHanh { get; set; }
 
-        [BsonElement("LinkTaiVe")]
-        public string? LinkTaiVe { get; set; }
+        // [BsonElement("LinkTaiVe")]
+        // public string? LinkTaiVe { get; set; }
     }
 }

@@ -162,7 +162,7 @@ namespace IdentityServerAPI.Services
                 return new ObjectResult(new { message = "Lỗi máy chủ khi lấy văn bản pháp luật." }) { StatusCode = 500 };
             }
         }
-        
+
         public async Task<IActionResult> GetAllNewsAsync()
         {
             try
@@ -208,6 +208,53 @@ namespace IdentityServerAPI.Services
             {
                 _logger.LogError(ex, "Error getting news article by ID.");
                 return new ObjectResult(new { message = "Lỗi máy chủ khi lấy chi tiết bản tin." }) { StatusCode = 500 };
+            }
+        }
+        
+        public async Task<IActionResult> GetAllLegalDocumentsAsync()
+        {
+            try
+            {
+                var documents = await _vanBanPhapLuatCollection.Find(_ => true)
+                                                               .SortByDescending(d => d.NgayBanHanh)
+                                                               .ToListAsync();
+
+                // Dùng lại LegalDocumentDto vì nó chứa các thông tin cần thiết cho trang danh sách
+                var documentDtos = documents.Select(d => new LegalDocumentDto
+                {
+                    Id = d.Id,
+                    TieuDe = d.TieuDe,
+                    SoHieuVanBan = d.SoHieuVanBan,
+                    NgayBanHanh = d.NgayBanHanh
+                }).ToList();
+
+                return new OkObjectResult(documentDtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all legal documents.");
+                return new ObjectResult(new { message = "Lỗi máy chủ khi lấy danh sách văn bản pháp luật." }) { StatusCode = 500 };
+            }
+        }
+
+        public async Task<IActionResult> GetLegalDocumentByIdAsync(string id)
+        {
+            try
+            {
+                var document = await _vanBanPhapLuatCollection.Find(d => d.Id == id).FirstOrDefaultAsync();
+
+                if (document == null)
+                {
+                    return new NotFoundObjectResult(new { message = "Không tìm thấy văn bản pháp luật." });
+                }
+
+                // Trả về toàn bộ object VanBanPhapLuat để frontend có thể lấy NoiDungVanBan
+                return new OkObjectResult(document);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting legal document by ID.");
+                return new ObjectResult(new { message = "Lỗi máy chủ khi lấy chi tiết văn bản pháp luật." }) { StatusCode = 500 };
             }
         }
     }

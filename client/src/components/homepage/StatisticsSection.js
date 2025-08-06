@@ -22,7 +22,7 @@ const StatisticsSection = ({ stats }) => {
     return (
         <Box sx={{ p: 3, height: '100%', border: '1px solid', borderColor: 'divider', borderRadius: '12px', backgroundColor: 'background.paper' }}>
             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', borderBottom: '2px solid', borderColor: 'grey.500', pb: 1, mb: 3 }}>
-                CỔNG DỊCH VỤ CÔNG ĐẤT ĐAI
+                THỐNG KÊ HỒ SƠ
             </Typography>
             <Box>
                 {/* Sử dụng tên thuộc tính mới từ DTO */}

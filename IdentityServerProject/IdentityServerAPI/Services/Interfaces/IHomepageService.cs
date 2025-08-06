@@ -10,5 +10,7 @@ namespace IdentityServerAPI.Services.Interfaces
         Task<IActionResult> GetRecentLegalDocumentsAsync(int limit);
         Task<IActionResult> GetAllNewsAsync();
         Task<IActionResult> GetNewsByIdAsync(string id);
+        Task<IActionResult> GetAllLegalDocumentsAsync();
+        Task<IActionResult> GetLegalDocumentByIdAsync(string id);
     }
 }

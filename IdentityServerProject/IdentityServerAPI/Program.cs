@@ -407,21 +407,21 @@ async Task SeedDatabaseAsync(IServiceProvider services)
     //     logger.LogInformation("Seeded {Count} news articles.", sampleNews.Count);
     // }
     
-    // Seed Văn Bản Pháp Luật
-    var vanBanCollection = database.GetCollection<VanBanPhapLuat>("VanBanPhapLuat");
-    if (await vanBanCollection.CountDocumentsAsync(_ => true) == 0)
-    {
-        logger.LogInformation("Seeding sample legal documents...");
-        var sampleDocs = new List<VanBanPhapLuat>
-        {
-            new VanBanPhapLuat { TieuDe = "Nghị định 91/2019/NĐ-CP về xử phạt vi phạm hành chính trong lĩnh vực đất đai", SoHieuVanBan = "91/2019/NĐ-CP", NgayBanHanh = new DateTime(2019, 11, 19) },
-            new VanBanPhapLuat { TieuDe = "Thông tư 25/2014/TT-BTNMT quy định về bản đồ địa chính", SoHieuVanBan = "25/2014/TT-BTNMT", NgayBanHanh = new DateTime(2014, 5, 19) },
-            new VanBanPhapLuat { TieuDe = "Luật Đất đai (sửa đổi) 2024", SoHieuVanBan = "31/2024/QH15", NgayBanHanh = new DateTime(2024, 1, 18) },
-            new VanBanPhapLuat { TieuDe = "Thông tư 33/2017/TT-BTNMT quy định chi tiết Nghị định 01/2017/NĐ-CP", SoHieuVanBan = "33/2017/TT-BTNMT", NgayBanHanh = new DateTime(2017, 9, 29) }
-        };
-        await vanBanCollection.InsertManyAsync(sampleDocs);
-        logger.LogInformation("Seeded {Count} legal documents.", sampleDocs.Count);
-    }
+    // // Seed Văn Bản Pháp Luật
+    // var vanBanCollection = database.GetCollection<VanBanPhapLuat>("VanBanPhapLuat");
+    // if (await vanBanCollection.CountDocumentsAsync(_ => true) == 0)
+    // {
+    //     logger.LogInformation("Seeding sample legal documents...");
+    //     var sampleDocs = new List<VanBanPhapLuat>
+    //     {
+    //         new VanBanPhapLuat { TieuDe = "Nghị định 91/2019/NĐ-CP về xử phạt vi phạm hành chính trong lĩnh vực đất đai", SoHieuVanBan = "91/2019/NĐ-CP", NgayBanHanh = new DateTime(2019, 11, 19) },
+    //         new VanBanPhapLuat { TieuDe = "Thông tư 25/2014/TT-BTNMT quy định về bản đồ địa chính", SoHieuVanBan = "25/2014/TT-BTNMT", NgayBanHanh = new DateTime(2014, 5, 19) },
+    //         new VanBanPhapLuat { TieuDe = "Luật Đất đai (sửa đổi) 2024", SoHieuVanBan = "31/2024/QH15", NgayBanHanh = new DateTime(2024, 1, 18) },
+    //         new VanBanPhapLuat { TieuDe = "Thông tư 33/2017/TT-BTNMT quy định chi tiết Nghị định 01/2017/NĐ-CP", SoHieuVanBan = "33/2017/TT-BTNMT", NgayBanHanh = new DateTime(2017, 9, 29) }
+    //     };
+    //     await vanBanCollection.InsertManyAsync(sampleDocs);
+    //     logger.LogInformation("Seeded {Count} legal documents.", sampleDocs.Count);
+    // }
     
     // Seed Hồ Sơ
     var hoSoCollection = database.GetCollection<HoSo>("HoSo");

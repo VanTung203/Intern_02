@@ -45,5 +45,17 @@ namespace IdentityServerAPI.Controllers
         {
             return await _homepageService.GetNewsByIdAsync(id);
         }
+
+        [HttpGet("legal-documents/all")] // GET /api/homepage/legal-documents/all
+        public async Task<IActionResult> GetAllLegalDocuments()
+        {
+            return await _homepageService.GetAllLegalDocumentsAsync();
+        }
+
+        [HttpGet("legal-documents/{id}")] // GET /api/homepage/legal-documents/some-object-id
+        public async Task<IActionResult> GetLegalDocumentById(string id)
+        {
+            return await _homepageService.GetLegalDocumentByIdAsync(id);
+        }
     }
 }
