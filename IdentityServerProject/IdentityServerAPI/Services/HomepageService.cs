@@ -6,6 +6,7 @@ using IdentityServerAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Linq;
+using MongoDB.Bson;
 
 namespace IdentityServerAPI.Services
 {
@@ -24,23 +25,80 @@ namespace IdentityServerAPI.Services
             _logger = logger;
         }
 
+        // public async Task<IActionResult> GetHomepageStatisticsAsync()
+        // {
+        //     try
+        //     {
+        //         var total = await _hoSoCollection.CountDocumentsAsync(_ => true);
+        //         var choTiepNhan = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaNop);
+        //         var dangThuLy = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaTiepNhanVaXuLy);
+        //         var daTraFilter = Builders<HoSo>.Filter.In(h => h.TrangThaiHoSo, new[] { HoSoStatus.DaTra, HoSoStatus.TuChoi });
+        //         var daTra = await _hoSoCollection.CountDocumentsAsync(daTraFilter);
+
+        //         var stats = new HomepageStatsDto
+        //         {
+        //             // DTO đã được cập nhật ở lần trước, ta chỉ cần gán giá trị
+        //             TongSoHoSo = total,
+        //             SoHoSoChoTiepNhan = choTiepNhan,
+        //             SoHoSoDangThuLy = dangThuLy,
+        //             SoHoSoDaTra = daTra // Gán giá trị mới đã được tính toán
+        //         };
+
+        //         return new OkObjectResult(stats);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error getting homepage statistics.");
+        //         return new ObjectResult(new { message = "Lỗi máy chủ khi lấy dữ liệu thống kê." }) { StatusCode = 500 };
+        //     }
+        // }
+
         public async Task<IActionResult> GetHomepageStatisticsAsync()
         {
             try
             {
-                var total = await _hoSoCollection.CountDocumentsAsync(_ => true);
-                var choTiepNhan = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaNop);
-                var dangThuLy = await _hoSoCollection.CountDocumentsAsync(h => h.TrangThaiHoSo == HoSoStatus.DaTiepNhanVaXuLy);
-                var daTraFilter = Builders<HoSo>.Filter.In(h => h.TrangThaiHoSo, new[] { HoSoStatus.DaTra, HoSoStatus.TuChoi });
-                var daTra = await _hoSoCollection.CountDocumentsAsync(daTraFilter);
+                var groupStage = new BsonDocument("$group", new BsonDocument
+                {
+                    { "_id", "$TrangThaiHoSo" },
+                    { "count", new BsonDocument("$sum", 1) }
+                });
+
+                var pipeline = new[] { groupStage };
+                var results = await _hoSoCollection.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
+                long total = 0;
+                long choTiepNhan = 0;
+                long dangThuLy = 0;
+                long daTraVaTuChoi = 0;
+
+                foreach (var result in results)
+                {
+                    var status = (HoSoStatus)result["_id"].AsInt32;
+                    // var count = result["count"].AsInt64;
+                    var count = result["count"].AsInt32;
+                    total += count;
+
+                    switch (status)
+                    {
+                        case HoSoStatus.DaNop:
+                            choTiepNhan = count;
+                            break;
+                        case HoSoStatus.DaTiepNhanVaXuLy:
+                            dangThuLy = count;
+                            break;
+                        case HoSoStatus.DaTra:
+                        case HoSoStatus.TuChoi:
+                            daTraVaTuChoi += count;
+                            break;
+                    }
+                }
 
                 var stats = new HomepageStatsDto
                 {
-                    // DTO đã được cập nhật ở lần trước, ta chỉ cần gán giá trị
                     TongSoHoSo = total,
                     SoHoSoChoTiepNhan = choTiepNhan,
                     SoHoSoDangThuLy = dangThuLy,
-                    SoHoSoDaTra = daTra // Gán giá trị mới đã được tính toán
+                    SoHoSoDaTra = daTraVaTuChoi
                 };
 
                 return new OkObjectResult(stats);
