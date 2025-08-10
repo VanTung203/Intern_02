@@ -57,9 +57,9 @@ const VanBanDetailPage = () => {
 
     return (
         <Container maxWidth="md" sx={{ my: 4 }}>
-            <Button component={RouterLink} to="/van-ban" startIcon={<ArrowBackIcon />} sx={{ mb: 2 }}>
+            {/* <Button component={RouterLink} to="/van-ban" startIcon={<ArrowBackIcon />} sx={{ mb: 2 }}>
                 Quay lại danh sách
-            </Button>
+            </Button> */}
             <Paper elevation={3} sx={{ p: { xs: 2, md: 4 } }}>
                 <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
                     {document.tieuDe}

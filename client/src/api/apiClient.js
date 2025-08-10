@@ -8,7 +8,8 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // timeout: 10000, // Optional
+  // timeout: 30000, // Optional
+  timeout: 100000, // Optional
 });
 
 // Interceptor để log request (tùy chọn)
@@ -23,6 +24,12 @@ apiClient.interceptors.response.use(response => {
   return response;
 }, error => {
   console.error('API Call Error: ', error.response || error.message || error);
+  // Xử lý lỗi Timeout
+    if (error.code === 'ECONNABORTED') {
+      console.warn('Timeout Error: Request took too long and was aborted.');
+      alert('Kết nối tới máy chủ quá lâu, vui lòng thử lại sau.');
+    }
+
   if (error.response && error.response.status === 401) {
     // Xử lý lỗi 401 (Unauthorized) tập trung ở đây nếu muốn
     // Ví dụ: gọi hàm logout, điều hướng về trang login

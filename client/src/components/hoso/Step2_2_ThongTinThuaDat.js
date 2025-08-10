@@ -114,7 +114,7 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
             </Typography>
             <Paper sx={{ p: 3, borderRadius: 2 }} variant="outlined">
                 <Grid container spacing={2.5}>
-                    <Grid item xs={12} sm={2.5}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             required
                             name="soThuTuThua"
@@ -126,7 +126,7 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
                             helperText={showValidation && errors.soThuTuThua}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={2.5}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             required
                             name="soHieuToBanDo"
@@ -138,18 +138,18 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
                             helperText={showValidation && errors.soHieuToBanDo}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={7}>
+                    <Grid item xs={12} sm={12}>
                         <TextField
                             name="diaChi"
                             label="Địa chỉ chi tiết thửa đất"
-                            // multiline
+                            multiline
                             // rows={2}
                             fullWidth
                             value={thongTinThuaDat.diaChi || ''}
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <Typography variant="body2" sx={{ mb: 1 }}>
                             🗺️ Sử dụng các công cụ trên bản đồ để vẽ hình dạng thửa đất của bạn. Bạn chỉ được vẽ một hình.
                         </Typography>
@@ -178,7 +178,7 @@ const Step2_2_ThongTinThuaDat = ({ formData, onDataChange, errors, showValidatio
                                 />
                             </FeatureGroup>
                         </MapContainer>
-                    </Grid>
+                    </Grid> */}
                 </Grid>
             </Paper>
         </Box>

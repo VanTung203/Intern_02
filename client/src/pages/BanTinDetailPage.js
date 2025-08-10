@@ -66,14 +66,14 @@ const BanTinDetailPage = () => {
 
     return (
         <Container maxWidth="md" sx={{ my: 4 }}>
-            <Button 
+            {/* <Button 
                 component={RouterLink} 
                 to="/ban-tin" 
                 startIcon={<ArrowBackIcon />} 
                 sx={{ mb: 2 }}
             >
                 Quay lại danh sách
-            </Button>
+            </Button> */}
             <Paper elevation={3} sx={{ p: { xs: 2, md: 4 } }}>
                 <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {article.tieuDe}

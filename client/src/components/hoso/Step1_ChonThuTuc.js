@@ -49,8 +49,8 @@ const Step1ChonThuTuc = ({ formData, onDataChange, errors, showValidation, thuTu
         <Box>
             <Typography variant="h6" gutterBottom>1. Chọn thủ tục</Typography>
             
-            <LocationSelector onLocationChange={handleLocationSelected} />
-            {/* <<< HIỂN THỊ LỖI CHUNG CHO BƯỚC 1 KHI CẦN >>> */}
+            {/* <LocationSelector onLocationChange={handleLocationSelected} /> */}
+            
             {showValidation && errors.maThuTucHanhChinh && (
                 <Alert severity="error" sx={{ mb: 2 }}>{errors.maThuTucHanhChinh}</Alert>
             )}

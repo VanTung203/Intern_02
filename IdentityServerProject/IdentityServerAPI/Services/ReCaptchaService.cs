@@ -47,6 +47,11 @@ namespace IdentityServerAPI.Services
 
                 return success;
             }
+            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+            {
+                _logger.LogError(ex, "Timeout while verifying reCAPTCHA.");
+                return false;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred during reCAPTCHA verification.");

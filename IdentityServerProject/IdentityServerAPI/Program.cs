@@ -82,7 +82,12 @@ builder.Services.AddScoped<IHomepageService, HomepageService>();
 builder.Services.AddScoped<IHoSoService, HoSoService>();
 builder.Services.AddScoped<IThuaDatService, ThuaDatService>();
 
-builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
+builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>()
+    .ConfigureHttpClient(client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(100);
+    });
+// builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
 // Comment do bị lỗi Timeout
 // builder.Services.AddScoped<IReCaptchaService, ReCaptchaService>();
 
