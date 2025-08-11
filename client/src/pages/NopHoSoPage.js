@@ -221,7 +221,7 @@ const NopHoSoPage = () => {
         <Container maxWidth="lg" sx={{ py: 1 }}>
             <Paper sx={{ p: { xs: 2, md: 4 }, boxShadow: '0 8px 16px 0 rgba(0,0,0,0.1)' }}>
                 <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Bảng điều khiển Hồ sơ
+                    Bảng điều khiển hồ sơ
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
                     Hoàn thành các mục dưới đây để nộp hồ sơ của bạn.
