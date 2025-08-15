@@ -85,7 +85,7 @@ builder.Services.AddScoped<IThuaDatService, ThuaDatService>();
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>()
     .ConfigureHttpClient(client =>
     {
-        client.Timeout = TimeSpan.FromSeconds(100);
+        client.Timeout = TimeSpan.FromSeconds(20);
     });
 // builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>();
 // Comment do bị lỗi Timeout

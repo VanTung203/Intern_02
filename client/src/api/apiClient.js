@@ -8,8 +8,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // timeout: 30000, // Optional
-  timeout: 100000, // Optional
+  timeout: 60000, // Optional
 });
 
 // Interceptor để log request (tùy chọn)

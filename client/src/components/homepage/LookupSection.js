@@ -3,6 +3,7 @@ import { Box, Typography, TextField, Button, Paper, CircularProgress, Alert } fr
 import SearchIcon from '@mui/icons-material/Search';
 import hoSoService from '../../services/hoSoService';
 import ReCAPTCHA from "react-google-recaptcha";
+import axios from 'axios';
 
 // <<< THÊM CSS ĐỂ ĐIỀU KHIỂN LOGO >>>
 const recaptchaBadgeStyle = {
@@ -98,7 +99,13 @@ const LookupSection = () => {
             const response = await hoSoService.lookupHoSo(payload);
             setLookupResult(response.data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Không tìm thấy hồ sơ hoặc có lỗi xảy ra.');
+            // Kiểm tra lỗi timeout của axios
+            if (axios.isCancel(err)) { // Hoặc err.code === 'ECONNABORTED' tùy phiên bản axios
+                setError('Yêu cầu tra cứu hết hạn. Vui lòng thử lại.');
+            } else {
+                // Các lỗi khác từ server (404, 500...)
+                setError(err.response?.data?.message || 'Không tìm thấy hồ sơ hoặc có lỗi xảy ra.');
+            }
         } finally {
             setLoading(false);
         }
